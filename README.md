@@ -15,6 +15,16 @@ Ditambah 3 stiker FX (efek suara "ZIP!", lambang generik, hiasan jaring). Semua 
 tidak ada aset yang meniru desain kostum, logo, atau tipografi milik Marvel/Sony. Jika ingin memakainya secara
 komersial, tetap disarankan untuk terus menjauh dari kemiripan visual dengan IP Spider-Man asli.
 
+## Fitur
+
+- **4 jepretan otomatis** dengan hitung mundur — durasi bisa dipilih **3 / 5 / 10 detik** di layar setup
+- **Jam live** tampil di layar kamera, dan setiap foto otomatis diberi **stempel tanggal & jam** saat dijepret
+- **Ambil ulang per foto** — tombol "⟲ Ambil ulang" di tiap foto membuka kamera lagi hanya untuk foto itu, tanpa mengulang sesi
+- **Efek suara** — bunyi hitung mundur, bunyi rana (shutter), dan **musik latar chiptune** selama sesi berlangsung; semua disintesis langsung di browser (tidak ada file audio eksternal) dan bisa dimatikan lewat tombol 🔊/🔇 di pojok kanan atas
+- **Dua pilihan layout** hasil akhir: **strip memanjang** (4×1, gaya Life4Cuts) atau **grid 2×2**
+- **Caption teks kustom** per foto, ditulis di kolom kontrol dan otomatis tercetak di bawah tiap foto pada hasil unduhan
+- Stiker karakter orisinal (gaya pixel/anime) yang bisa digeser, diputar, dan diubah ukuran
+
 ## Menjalankan secara lokal
 
 ```bash

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { captureFrame } from '../utils/compositor'
+import { playBeep, playShutter, startAmbient, stopAmbient } from '../utils/sound'
 
 const SHOTS_NEEDED = 4
-const COUNT_FROM = 3
 
-export default function Viewfinder({ filterCss, onComplete }) {
+export default function Viewfinder({ filterCss, countdownFrom = 3, muted = false, onComplete }) {
   const videoRef = useRef(null)
   const streamRef = useRef(null)
   const [error, setError] = useState(null)
@@ -13,6 +13,12 @@ export default function Viewfinder({ filterCss, onComplete }) {
   const [count, setCount] = useState(null)
   const [shots, setShots] = useState([])
   const [flash, setFlash] = useState(false)
+  const [clock, setClock] = useState(() => new Date())
+
+  useEffect(() => {
+    const t = setInterval(() => setClock(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -32,29 +38,34 @@ export default function Viewfinder({ filterCss, onComplete }) {
     return () => {
       cancelled = true
       streamRef.current?.getTracks().forEach((t) => t.stop())
+      stopAmbient()
     }
   }, [])
 
   useEffect(() => {
     if (!running) return
     if (shots.length >= SHOTS_NEEDED) {
+      stopAmbient()
       onComplete(shots)
       return
     }
 
-    let n = COUNT_FROM
+    let n = countdownFrom
     setCount(n)
+    if (!muted) playBeep(520, 0.1, 'sine', 0.12)
     const tick = setInterval(() => {
       n -= 1
       if (n === 0) {
         clearInterval(tick)
         setCount('•')
         setFlash(true)
+        if (!muted) playShutter()
         const frame = captureFrame(videoRef.current, filterCss)
         setTimeout(() => setFlash(false), 150)
         setShots((prev) => [...prev, frame])
         setCount(null)
       } else {
+        if (!muted) playBeep(520, 0.1, 'sine', 0.12)
         setCount(n)
       }
     }, 1000)
@@ -78,6 +89,9 @@ export default function Viewfinder({ filterCss, onComplete }) {
           muted
           playsInline
         />
+        <div className="viewfinder__clock">
+          {clock.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </div>
         {count !== null && <div className="viewfinder__count">{count}</div>}
         <div className="viewfinder__shotdots">
           {Array.from({ length: SHOTS_NEEDED }).map((_, i) => (
@@ -92,11 +106,12 @@ export default function Viewfinder({ filterCss, onComplete }) {
         onClick={() => {
           setShots([])
           setRunning(true)
+          startAmbient(muted)
         }}
       >
         {running ? 'SEDANG MEMOTRET…' : 'MULAI SESI · 4 JEPRETAN'}
       </button>
-      <p className="viewfinder__hint">Bersiap pose — tiap jepretan punya hitung mundur 3 detik.</p>
+      <p className="viewfinder__hint">Bersiap pose — tiap jepretan punya hitung mundur {countdownFrom} detik.</p>
     </div>
   )
 }

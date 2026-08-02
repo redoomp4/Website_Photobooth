@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { STICKERS, svgToDataUri } from '../stickers/stickerData'
 import { renderStrip } from '../utils/compositor'
+import RetakeModal from './RetakeModal'
 
 const REF_W = 640
 const REF_H = 480
@@ -16,13 +17,26 @@ const FRAME_COLORS = [
 let uidCounter = 0
 const nextUid = () => `st-${uidCounter++}`
 
-export default function StripPreview({ photos, mode, armedId, onArm, onRestart }) {
+export default function StripPreview({
+  photos,
+  mode,
+  armedId,
+  onArm,
+  onRestart,
+  onRetakePhoto,
+  filterCss,
+  countdownFrom,
+  muted,
+}) {
   const [placements, setPlacements] = useState(() => photos.map(() => []))
+  const [captions, setCaptions] = useState(() => photos.map(() => ''))
   const [frameColor, setFrameColor] = useState(FRAME_COLORS[0].hex)
+  const [layout, setLayout] = useState('strip') // 'strip' | 'grid'
   const [selected, setSelected] = useState(null) // { cellIndex, uid }
   const [busy, setBusy] = useState(false)
+  const [retakeIndex, setRetakeIndex] = useState(null)
   const cellRefs = useRef([])
-  const dragRef = useRef(null) // { cellIndex, uid, pointerId }
+  const dragRef = useRef(null)
 
   const stickerById = (id) => STICKERS.find((s) => s.id === id)
 
@@ -89,7 +103,7 @@ export default function StripPreview({ photos, mode, armedId, onArm, onRestart }
           x: p.x,
           y: p.y,
           rotation: p.rotation,
-          size: (p.size / 200) * REF_W * 0.55, // convert on-screen scale to canvas px
+          size: (p.size / 200) * REF_W * 0.55,
           src: svgToDataUri(stickerById(p.stickerId)[p.mode]),
         }))
       )
@@ -98,6 +112,8 @@ export default function StripPreview({ photos, mode, armedId, onArm, onRestart }
         placements: stickerPlacements,
         frameColor,
         title: 'COBWEB BOOTH',
+        layout,
+        captions,
       })
       const a = document.createElement('a')
       a.href = dataUrl
@@ -110,50 +126,84 @@ export default function StripPreview({ photos, mode, armedId, onArm, onRestart }
 
   return (
     <div className="editor" onClick={() => setSelected(null)}>
-      <div className="editor__strip" style={{ background: frameColor }}>
+      <div
+        className={`editor__strip ${layout === 'grid' ? 'editor__strip--grid' : ''}`}
+        style={{ background: frameColor }}
+      >
         <h2 className="editor__title">COBWEB BOOTH</h2>
         {photos.map((src, i) => (
-          <div
-            key={i}
-            ref={(el) => (cellRefs.current[i] = el)}
-            className="editor__cell"
-            style={{ aspectRatio: `${REF_W}/${REF_H}` }}
-            onClick={(e) => {
-              e.stopPropagation()
-              handleCellClick(i, e)
-            }}
-            onPointerMove={(e) => onStickerPointerMove(i, e)}
-          >
-            <img src={src} className="editor__photo" alt={`Jepretan ${i + 1}`} />
-            {placements[i].map((p) => {
-              const st = stickerById(p.stickerId)
-              const isSel = selected && selected.uid === p.uid
-              return (
-                <img
-                  key={p.uid}
-                  src={svgToDataUri(st[p.mode])}
-                  alt={st.name}
-                  className={`editor__sticker ${isSel ? 'is-selected' : ''}`}
-                  style={{
-                    left: `${p.x * 100}%`,
-                    top: `${p.y * 100}%`,
-                    width: p.size,
-                    height: p.size,
-                    transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
-                  }}
-                  onPointerDown={(e) => onStickerPointerDown(i, p.uid, e)}
-                  onPointerUp={onStickerPointerUp}
-                  onClick={(e) => e.stopPropagation()}
-                  draggable={false}
-                />
-              )
-            })}
+          <div key={i} className="editor__cellWrap">
+            <div
+              ref={(el) => (cellRefs.current[i] = el)}
+              className="editor__cell"
+              style={{ aspectRatio: `${REF_W}/${REF_H}` }}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCellClick(i, e)
+              }}
+              onPointerMove={(e) => onStickerPointerMove(i, e)}
+            >
+              <img src={src} className="editor__photo" alt={`Jepretan ${i + 1}`} />
+              {placements[i].map((p) => {
+                const st = stickerById(p.stickerId)
+                const isSel = selected && selected.uid === p.uid
+                return (
+                  <img
+                    key={p.uid}
+                    src={svgToDataUri(st[p.mode])}
+                    alt={st.name}
+                    className={`editor__sticker ${isSel ? 'is-selected' : ''}`}
+                    style={{
+                      left: `${p.x * 100}%`,
+                      top: `${p.y * 100}%`,
+                      width: p.size,
+                      height: p.size,
+                      transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
+                    }}
+                    onPointerDown={(e) => onStickerPointerDown(i, p.uid, e)}
+                    onPointerUp={onStickerPointerUp}
+                    onClick={(e) => e.stopPropagation()}
+                    draggable={false}
+                  />
+                )
+              })}
+              <button
+                className="editor__retakeBtn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setRetakeIndex(i)
+                }}
+              >
+                ⟲ Ambil ulang
+              </button>
+            </div>
+            {captions[i] && <div className="editor__captionPreview">{captions[i]}</div>}
           </div>
         ))}
-        <div className="editor__footer">{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+        <div className="editor__footer">
+          {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+        </div>
       </div>
 
       <div className="editor__controls" onClick={(e) => e.stopPropagation()}>
+        <div className="editor__layoutToggle">
+          <span>LAYOUT</span>
+          <div className="webshooter__track">
+            <button
+              className={`webshooter__btn ${layout === 'strip' ? 'is-active' : ''}`}
+              onClick={() => setLayout('strip')}
+            >
+              STRIP
+            </button>
+            <button
+              className={`webshooter__btn ${layout === 'grid' ? 'is-active' : ''}`}
+              onClick={() => setLayout('grid')}
+            >
+              GRID 2×2
+            </button>
+          </div>
+        </div>
+
         <div className="editor__frameColors">
           <span>WARNA BINGKAI</span>
           <div className="editor__swatches">
@@ -167,6 +217,24 @@ export default function StripPreview({ photos, mode, armedId, onArm, onRestart }
               />
             ))}
           </div>
+        </div>
+
+        <div className="editor__captions">
+          <span>CAPTION PER FOTO</span>
+          {photos.map((_, i) => (
+            <input
+              key={i}
+              className="editor__captionInput"
+              type="text"
+              maxLength={28}
+              placeholder={`Caption foto ${i + 1}…`}
+              value={captions[i]}
+              onChange={(e) => {
+                const val = e.target.value
+                setCaptions((prev) => prev.map((c, idx) => (idx === i ? val : c)))
+              }}
+            />
+          ))}
         </div>
 
         {selectedPlacement && (
@@ -207,6 +275,21 @@ export default function StripPreview({ photos, mode, armedId, onArm, onRestart }
           </button>
         </div>
       </div>
+
+      {retakeIndex !== null && (
+        <div className="retakeOverlay" onClick={(e) => e.stopPropagation()}>
+          <RetakeModal
+            filterCss={filterCss}
+            countdownFrom={countdownFrom}
+            muted={muted}
+            onCancel={() => setRetakeIndex(null)}
+            onDone={(dataUrl) => {
+              onRetakePhoto(retakeIndex, dataUrl)
+              setRetakeIndex(null)
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
