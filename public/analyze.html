@@ -18,22 +18,30 @@
       const width = canvas.width;
       const height = canvas.height;
 
+      // Let's sample colors down the vertical center line to see what values we get
+      const samples = [];
+      const midX = Math.floor(width / 2);
+      for (let y = 0; y < height; y += 10) {
+        const idx = (y * width + midX) * 4;
+        samples.push({ y, r: data[idx], g: data[idx+1], b: data[idx+2] });
+      }
+      
+      // Let's find vertical segments that are very dark (say, R < 50, G < 50, B < 50)
       const boxes = [];
       let inBox = false;
       let boxStart = 0;
       
-      const midX = Math.floor(width / 2);
       for (let y = 0; y < height; y++) {
         const idx = (y * width + midX) * 4;
         const r = data[idx];
         const g = data[idx+1];
         const b = data[idx+2];
-        const isBlack = r < 10 && g < 10 && b < 10;
+        const isDark = r < 50 && g < 50 && b < 50;
         
-        if (isBlack && !inBox) {
+        if (isDark && !inBox) {
           inBox = true;
           boxStart = y;
-        } else if (!isBlack && inBox) {
+        } else if (!isDark && inBox) {
           inBox = false;
           boxes.push({ y1: boxStart, y2: y - 1 });
         }
@@ -52,8 +60,8 @@
 
         for (let x = midX; x >= 0; x--) {
           const idx = (midY * width + x) * 4;
-          const isBlack = data[idx] < 10 && data[idx+1] < 10 && data[idx+2] < 10;
-          if (!isBlack) {
+          const isDark = data[idx] < 50 && data[idx+1] < 50 && data[idx+2] < 50;
+          if (!isDark) {
             x1 = x + 1;
             break;
           }
@@ -61,8 +69,8 @@
 
         for (let x = midX; x < width; x++) {
           const idx = (midY * width + x) * 4;
-          const isBlack = data[idx] < 10 && data[idx+1] < 10 && data[idx+2] < 10;
-          if (!isBlack) {
+          const isDark = data[idx] < 50 && data[idx+1] < 50 && data[idx+2] < 50;
+          if (!isDark) {
             x2 = x - 1;
             break;
           }
@@ -80,7 +88,7 @@
       
       const resDiv = document.createElement('div');
       resDiv.id = 'results';
-      resDiv.innerText = JSON.stringify(finalBoxes);
+      resDiv.innerText = JSON.stringify({ samples: samples.slice(0, 30), finalBoxes });
       document.body.appendChild(resDiv);
     };
   </script>
