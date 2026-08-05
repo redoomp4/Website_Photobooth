@@ -105,7 +105,16 @@ export const SPIDER_THEMES = [
 
 // Build the final downloadable strip: header, N photos (each with placed stickers + optional
 // caption), colored frame, footer. Supports Spiderman PNG template mode or custom Spider-Verse themes.
-export async function renderStrip({ photos, placements, frameColor, themeId = 'spidey', title = 'COBWEB BOOTH', layout = 'strip', captions = [] }) {
+export async function renderStrip({
+  photos,
+  placements,
+  frameColor,
+  themeId = 'spidey',
+  title = 'COBWEB BOOTH',
+  layout = 'strip',
+  captions = [],
+  doodleCanvas = null,
+}) {
   const selectedTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
   // If using classic Spidey PNG frame template and layout is strip with 3 photos
@@ -157,6 +166,12 @@ export async function renderStrip({ photos, placements, frameColor, themeId = 's
 
     // Draw Spiderman Frame Template on top
     ctx.drawImage(frameImg, 0, 0)
+
+    // Draw Doodle Layer on top if present
+    if (doodleCanvas) {
+      ctx.drawImage(doodleCanvas, 0, 0, canvas.width, canvas.height)
+    }
+
     return canvas.toDataURL('image/png')
   }
 
