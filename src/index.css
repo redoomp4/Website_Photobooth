@@ -594,8 +594,255 @@ img { max-width: 100%; display: block; }
   gap: 12px;
 }
 
+/* ---------------- Doodle Canvas ---------------- */
+.doodleWrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.doodleWrapper.is-enabled {
+  pointer-events: auto;
+}
+
+.doodleCanvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.doodleToolbar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 14, 26, 0.94);
+  border: 2px solid var(--crimson);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  width: min(90%, 460px);
+  justify-content: space-between;
+}
+
+.doodleToolbar__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doodleToolbar__label {
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--gold);
+}
+
+.doodleColors, .doodleSizes {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.doodleColorBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+.doodleColorBtn.is-active {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  transform: scale(1.15);
+}
+
+.doodleEraserBtn {
+  background: rgba(245,243,238,0.15);
+  border: 1px solid rgba(245,243,238,0.3);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+}
+.doodleEraserBtn.is-active {
+  background: var(--crimson);
+  border-color: var(--gold);
+}
+
+.doodleSizeBtn {
+  background: rgba(245,243,238,0.1);
+  border: 1px solid rgba(245,243,238,0.3);
+  border-radius: 6px;
+  color: var(--cream);
+  font-size: 0.65rem;
+  padding: 3px 6px;
+}
+.doodleSizeBtn.is-active {
+  background: var(--cyan);
+  color: var(--ink-deep);
+  font-weight: 800;
+}
+
+.doodleGlowBtn {
+  background: rgba(255, 200, 87, 0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+.doodleGlowBtn.is-active {
+  background: var(--gold);
+  color: var(--ink-deep);
+}
+
+.btn--sm {
+  padding: 4px 8px;
+  font-size: 0.7rem;
+}
+
+/* ---------------- Share & Receipt Modal ---------------- */
+.shareOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 14, 26, 0.88);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.shareModal {
+  background: var(--ink-deep);
+  border: 3px solid var(--crimson);
+  border-radius: 16px;
+  padding: 24px;
+  width: min(440px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+}
+
+.shareModal__header {
+  position: relative;
+  text-align: center;
+}
+
+.shareModal__badge {
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  color: var(--cyan);
+}
+
+.shareModal__title {
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-size: 1.6rem;
+  margin: 4px 0 0;
+}
+
+.shareModal__closeBtn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  font-size: 1.2rem;
+}
+
+.receiptCard {
+  background: #F5F3EE;
+  color: #1A1025;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 2px dashed #1A1025;
+}
+
+.receiptCard__top {
+  text-align: center;
+  border-bottom: 2px solid #1A1025;
+  padding-bottom: 8px;
+}
+.receiptCard__brand {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: #8C1220;
+}
+.receiptCard__code {
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  margin-top: 2px;
+}
+.receiptCard__date {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.receiptCard__preview {
+  display: flex;
+  justify-content: center;
+  max-height: 200px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.receiptCard__preview img {
+  height: 200px;
+  object-fit: contain;
+}
+
+.receiptCard__bottom {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-top: 2px solid #1A1025;
+  padding-top: 10px;
+}
+
+.receiptCard__qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.receiptCard__qr img {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #1A1025;
+}
+.receiptCard__qr span {
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+.receiptCard__info {
+  font-size: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.receiptCard__info p { margin: 0; }
+
+.shareModal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
 /* ---------------- Responsive ---------------- */
 @media (max-width: 720px) {
   .editor { grid-template-columns: 1fr; }
   .editor__controls { position: static; }
+  .doodleToolbar { flex-wrap: wrap; justify-content: center; }
 }
+
