@@ -1,18 +1,10 @@
 import { useRef, useState } from 'react'
 import { STICKERS, svgToDataUri } from '../stickers/stickerData'
-import { renderStrip } from '../utils/compositor'
+import { renderStrip, SPIDER_THEMES } from '../utils/compositor'
 import RetakeModal from './RetakeModal'
 
 const REF_W = 640
 const REF_H = 480
-
-const FRAME_COLORS = [
-  { id: 'ink', label: 'Midnight Ink', hex: '#0B1330' },
-  { id: 'crimson', label: 'Signal Red', hex: '#8C1220' },
-  { id: 'violet', label: 'Toxic Violet', hex: '#3B0764' },
-  { id: 'teal', label: 'Lantern Teal', hex: '#0F4C4C' },
-  { id: 'cream', label: 'Comic Cream', hex: '#F5F3EE' },
-]
 
 let uidCounter = 0
 const nextUid = () => `st-${uidCounter++}`
@@ -30,7 +22,7 @@ export default function StripPreview({
 }) {
   const [placements, setPlacements] = useState(() => photos.map(() => []))
   const [captions, setCaptions] = useState(() => photos.map(() => ''))
-  const [frameColor, setFrameColor] = useState(FRAME_COLORS[0].hex)
+  const [themeId, setThemeId] = useState('spidey')
   const [layout, setLayout] = useState('strip') // 'strip' | 'grid'
   const [selected, setSelected] = useState(null) // { cellIndex, uid }
   const [busy, setBusy] = useState(false)
@@ -39,6 +31,7 @@ export default function StripPreview({
   const dragRef = useRef(null)
 
   const stickerById = (id) => STICKERS.find((s) => s.id === id)
+  const activeTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
   function handleCellClick(cellIndex, e) {
     if (!armedId) return
@@ -110,14 +103,14 @@ export default function StripPreview({
       const dataUrl = await renderStrip({
         photos,
         placements: stickerPlacements,
-        frameColor,
+        themeId,
         title: 'COBWEB BOOTH',
         layout,
         captions,
       })
       const a = document.createElement('a')
       a.href = dataUrl
-      a.download = 'cobweb-booth-strip.png'
+      a.download = `cobweb-${themeId}-strip.png`
       a.click()
     } finally {
       setBusy(false)
@@ -127,16 +120,35 @@ export default function StripPreview({
   return (
     <div className="editor" onClick={() => setSelected(null)}>
       <div
-        className={`editor__strip ${layout === 'grid' ? 'editor__strip--grid' : ''}`}
-        style={{ background: frameColor }}
+        className={`editor__strip ${layout === 'grid' ? 'editor__strip--grid' : ''} editor__strip--${themeId}`}
+        style={{
+          background: activeTheme.bg,
+          borderColor: activeTheme.borderColor,
+          color: activeTheme.textColor,
+        }}
       >
-        <h2 className="editor__title">COBWEB BOOTH</h2>
+        {/* Spiderman Frame Overlay Graphic when Spidey theme is selected */}
+        {activeTheme.useTemplate && layout === 'strip' && (
+          <img
+            src="/Spidey Strip Photobooth 1.png"
+            className="editor__spideyOverlay"
+            alt="Spiderman Frame Overlay"
+          />
+        )}
+
+        <h2 className="editor__title" style={{ color: activeTheme.textColor }}>
+          {activeTheme.badge} COBWEB BOOTH {activeTheme.badge}
+        </h2>
+
         {photos.map((src, i) => (
           <div key={i} className="editor__cellWrap">
             <div
               ref={(el) => (cellRefs.current[i] = el)}
               className="editor__cell"
-              style={{ aspectRatio: `${REF_W}/${REF_H}` }}
+              style={{
+                aspectRatio: `${REF_W}/${REF_H}`,
+                borderColor: activeTheme.accentColor || 'rgba(0,0,0,0.3)',
+              }}
               onClick={(e) => {
                 e.stopPropagation()
                 handleCellClick(i, e)
@@ -180,12 +192,33 @@ export default function StripPreview({
             {captions[i] && <div className="editor__captionPreview">{captions[i]}</div>}
           </div>
         ))}
-        <div className="editor__footer">
+
+        <div className="editor__footer" style={{ color: activeTheme.textColor }}>
           {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
         </div>
       </div>
 
       <div className="editor__controls" onClick={(e) => e.stopPropagation()}>
+        <div className="editor__themePicker">
+          <span className="editor__pickerLabel">TEMA SPIDER-VERSE</span>
+          <div className="themeSelector">
+            {SPIDER_THEMES.map((t) => (
+              <button
+                key={t.id}
+                className={`themeBtn ${themeId === t.id ? 'is-active' : ''}`}
+                onClick={() => setThemeId(t.id)}
+                style={{
+                  '--theme-bg': t.bg,
+                  '--theme-border': t.borderColor,
+                }}
+              >
+                <span className="themeBtn__badge">{t.badge}</span>
+                <span className="themeBtn__name">{t.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="editor__layoutToggle">
           <span>LAYOUT</span>
           <div className="webshooter__track">
@@ -201,21 +234,6 @@ export default function StripPreview({
             >
               GRID 2×2
             </button>
-          </div>
-        </div>
-
-        <div className="editor__frameColors">
-          <span>WARNA BINGKAI</span>
-          <div className="editor__swatches">
-            {FRAME_COLORS.map((c) => (
-              <button
-                key={c.id}
-                className={`swatch ${frameColor === c.hex ? 'is-active' : ''}`}
-                style={{ background: c.hex }}
-                title={c.label}
-                onClick={() => setFrameColor(c.hex)}
-              />
-            ))}
           </div>
         </div>
 

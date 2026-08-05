@@ -51,9 +51,116 @@ export function captureFrame(videoEl, filterCss, { stampTime = true } = {}) {
   return canvas.toDataURL('image/png')
 }
 
+export const SPIDER_THEMES = [
+  {
+    id: 'spidey',
+    name: 'Classic Spidey',
+    badge: '🕷️',
+    bg: '#8C1220',
+    borderColor: '#E63946',
+    textColor: '#F5F3EE',
+    useTemplate: true,
+  },
+  {
+    id: 'miles',
+    name: 'Miles Glitch',
+    badge: '⚡',
+    bg: '#0A0E1A',
+    borderColor: '#FF0055',
+    accentColor: '#00E5FF',
+    textColor: '#F5F3EE',
+    useTemplate: false,
+  },
+  {
+    id: 'gwen',
+    name: 'Spider-Gwen',
+    badge: '🕸️',
+    bg: '#1A0B2E',
+    borderColor: '#FF007F',
+    accentColor: '#00F5D4',
+    textColor: '#F5F3EE',
+    useTemplate: false,
+  },
+  {
+    id: 'symbiote',
+    name: 'Symbiote Venom',
+    badge: '👁️',
+    bg: '#050508',
+    borderColor: '#3B0764',
+    accentColor: '#A855F7',
+    textColor: '#F5F3EE',
+    useTemplate: false,
+  },
+  {
+    id: 'vintage',
+    name: '1960s Comic',
+    badge: '💥',
+    bg: '#F7F1E3',
+    borderColor: '#8C1220',
+    accentColor: '#FFC857',
+    textColor: '#1A1025',
+    useTemplate: false,
+  },
+]
+
 // Build the final downloadable strip: header, N photos (each with placed stickers + optional
-// caption), colored frame, footer. Supports 'strip' (vertical stack) or 'grid' (2 columns) layout.
-export async function renderStrip({ photos, placements, frameColor, title = 'COBWEB BOOTH', layout = 'strip', captions = [] }) {
+// caption), colored frame, footer. Supports Spiderman PNG template mode or custom Spider-Verse themes.
+export async function renderStrip({ photos, placements, frameColor, themeId = 'spidey', title = 'COBWEB BOOTH', layout = 'strip', captions = [] }) {
+  const selectedTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
+
+  // If using classic Spidey PNG frame template and layout is strip with 3 photos
+  if (selectedTheme.useTemplate && layout === 'strip' && photos.length === 3) {
+    const frameImg = await loadImage('/Spidey Strip Photobooth 1.png')
+    const canvas = document.createElement('canvas')
+    canvas.width = frameImg.width
+    canvas.height = frameImg.height
+    const ctx = canvas.getContext('2d')
+
+    // Draw photos in exact slot coordinates behind the template
+    const slots = [
+      { x: 65, y: 95, w: 462, h: 373 },
+      { x: 65, y: 546, w: 462, h: 374 },
+      { x: 65, y: 1000, w: 462, h: 371 },
+    ]
+
+    for (let i = 0; i < Math.min(photos.length, 3); i++) {
+      const slot = slots[i]
+      const img = await loadImage(photos[i])
+      ctx.drawImage(img, slot.x, slot.y, slot.w, slot.h)
+
+      // Draw stickers placed on this cell
+      const stickersForCell = placements[i] || []
+      for (const p of stickersForCell) {
+        const stImg = await loadImage(p.src)
+        const size = (p.size / 200) * slot.w * 0.55
+        ctx.save()
+        const cx = slot.x + p.x * slot.w
+        const cy = slot.y + p.y * slot.h
+        ctx.translate(cx, cy)
+        ctx.rotate(((p.rotation || 0) * Math.PI) / 180)
+        ctx.drawImage(stImg, -size / 2, -size / 2, size, size)
+        ctx.restore()
+      }
+
+      // Draw caption if present
+      const caption = captions[i]
+      if (caption) {
+        ctx.fillStyle = '#FFFFFF'
+        ctx.font = '700 20px Bangers, cursive'
+        ctx.textAlign = 'center'
+        ctx.strokeStyle = '#000000'
+        ctx.lineWidth = 4
+        ctx.strokeText(caption, slot.x + slot.w / 2, slot.y + slot.h - 15)
+        ctx.fillText(caption, slot.x + slot.w / 2, slot.y + slot.h - 15)
+      }
+    }
+
+    // Draw Spiderman Frame Template on top
+    ctx.drawImage(frameImg, 0, 0)
+    return canvas.toDataURL('image/png')
+  }
+
+  // Standard multi-theme canvas renderer
   const cellW = 640
   const cellH = 480
   const pad = 28
@@ -71,14 +178,19 @@ export async function renderStrip({ photos, placements, frameColor, title = 'COB
   const ctx = canvas.getContext('2d')
 
   // frame background
-  ctx.fillStyle = frameColor
+  ctx.fillStyle = selectedTheme ? selectedTheme.bg : frameColor
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+  // theme accent border
+  ctx.strokeStyle = selectedTheme?.borderColor || '#E63946'
+  ctx.lineWidth = 12
+  ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12)
+
   // header
-  ctx.fillStyle = '#F5F3EE'
-  ctx.font = "700 40px Bangers, cursive"
+  ctx.fillStyle = selectedTheme?.textColor || '#F5F3EE'
+  ctx.font = '700 42px Bangers, cursive'
   ctx.textAlign = 'center'
-  ctx.fillText(title, canvas.width / 2, pad + 55)
+  ctx.fillText(`${selectedTheme?.badge || '🕷️'} ${title} ${selectedTheme?.badge || '🕷️'}`, canvas.width / 2, pad + 55)
 
   for (let i = 0; i < photos.length; i++) {
     const col = i % cols
@@ -89,6 +201,11 @@ export async function renderStrip({ photos, placements, frameColor, title = 'COB
     const img = await loadImage(photos[i])
     ctx.drawImage(img, x, y, cellW, cellH)
 
+    // Cell border
+    ctx.strokeStyle = selectedTheme?.accentColor || '#FFC857'
+    ctx.lineWidth = 4
+    ctx.strokeRect(x, y, cellW, cellH)
+
     const stickersForCell = placements[i] || []
     for (const p of stickersForCell) {
       const stImg = await loadImage(p.src)
@@ -97,23 +214,23 @@ export async function renderStrip({ photos, placements, frameColor, title = 'COB
       const cx = x + p.x * cellW
       const cy = y + p.y * cellH
       ctx.translate(cx, cy)
-      ctx.rotate((p.rotation || 0) * Math.PI / 180)
+      ctx.rotate(((p.rotation || 0) * Math.PI) / 180)
       ctx.drawImage(stImg, -size / 2, -size / 2, size, size)
       ctx.restore()
     }
 
     const caption = captions[i]
     if (caption) {
-      ctx.fillStyle = '#F5F3EE'
-      ctx.font = "600 22px Manrope, sans-serif"
+      ctx.fillStyle = selectedTheme?.textColor || '#F5F3EE'
+      ctx.font = '600 22px Manrope, sans-serif'
       ctx.textAlign = 'center'
       ctx.fillText(caption, x + cellW / 2, y + cellH + captionH / 2 + 8)
     }
   }
 
   // footer
-  ctx.fillStyle = '#F5F3EE'
-  ctx.font = "500 18px Manrope, sans-serif"
+  ctx.fillStyle = selectedTheme?.textColor || '#F5F3EE'
+  ctx.font = '500 18px Manrope, sans-serif'
   ctx.textAlign = 'center'
   ctx.fillText(
     new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }),
@@ -123,3 +240,4 @@ export async function renderStrip({ photos, placements, frameColor, title = 'COB
 
   return canvas.toDataURL('image/png')
 }
+
