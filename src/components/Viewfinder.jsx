@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { captureFrame } from '../utils/compositor'
 import { playBeep, playShutter, startAmbient, stopAmbient } from '../utils/sound'
 
-const SHOTS_NEEDED = 4
+const SHOTS_NEEDED = 3
 
 export default function Viewfinder({ filterCss, countdownFrom = 3, muted = false, onComplete }) {
   const videoRef = useRef(null)
