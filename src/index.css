@@ -97,8 +97,53 @@ img { max-width: 100%; display: block; }
 .app__tagline {
   font-size: 0.95rem;
   color: rgba(245,243,238,0.7);
-  margin: 4px 0 0;
+  margin: 4px 0 14px;
 }
+
+/* ---------------- Sound Board ---------------- */
+.soundBoard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.soundBoard__label {
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.soundBoard__buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.soundBtn {
+  background: rgba(26,16,37,0.8);
+  border: 2px solid rgba(245,243,238,0.25);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--cream);
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  letter-spacing: 0.5px;
+  transition: all 0.15s ease;
+}
+.soundBtn:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 4px 10px rgba(255,200,87,0.2);
+}
+.soundBtn:active {
+  transform: translateY(1px);
+}
+.soundBtn--thwip { border-color: var(--crimson); color: var(--crimson); }
+.soundBtn--sense { border-color: var(--gold); color: var(--gold); }
+.soundBtn--glitch { border-color: var(--cyan); color: var(--cyan); }
+.soundBtn--pop { border-color: var(--teal); color: var(--teal); }
+.soundBtn--mute { border-color: rgba(245,243,238,0.4); }
 
 .app__stage { position: relative; z-index: 1; }
 

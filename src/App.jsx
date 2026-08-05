@@ -4,6 +4,7 @@ import FilterRail from './components/FilterRail'
 import Viewfinder from './components/Viewfinder'
 import StickerBelt from './components/StickerBelt'
 import StripPreview from './components/StripPreview'
+import SoundBoard from './components/SoundBoard'
 import { FILTERS } from './utils/compositor'
 
 const COUNTDOWN_OPTIONS = [3, 5, 10]
@@ -29,16 +30,10 @@ export default function App() {
         <div className="app__brand">
           <span className="app__brand-mark" aria-hidden>◈</span>
           <h1>COBWEB BOOTH</h1>
-          <button
-            className="app__muteBtn"
-            onClick={() => setMuted((m) => !m)}
-            aria-pressed={muted}
-            title={muted ? 'Nyalakan suara' : 'Matikan suara'}
-          >
-            {muted ? '🔇' : '🔊'}
-          </button>
         </div>
         <p className="app__tagline">Photo booth pahlawan laba-laba — versi orisinal, bebas tempel stiker.</p>
+
+        <SoundBoard muted={muted} onToggleMute={() => setMuted((m) => !m)} />
       </header>
 
       <div className="app__crackbg" aria-hidden />
