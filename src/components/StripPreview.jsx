@@ -206,9 +206,26 @@ export default function StripPreview({
         <div className="editor__footer" style={{ color: activeTheme.textColor }}>
           {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
         </div>
+
+        {/* Doodle Drawing Layer Overlay */}
+        <DoodleCanvas
+          enabled={doodleEnabled}
+          onCanvasReady={(cvs) => (doodleCanvasRef.current = cvs)}
+        />
       </div>
 
       <div className="editor__controls" onClick={(e) => e.stopPropagation()}>
+        <div className="editor__doodleToggle">
+          <span>MODE CORET-CORET / DOODLE</span>
+          <button
+            className={`btn ${doodleEnabled ? 'btn--primary' : 'btn--ghost'}`}
+            style={{ width: '100%' }}
+            onClick={() => setDoodleEnabled((d) => !d)}
+          >
+            {doodleEnabled ? '✏️ MATIKAN CORETAN' : '🎨 CORET-CORET JARING (PEN)'}
+          </button>
+        </div>
+
         <div className="editor__themePicker">
           <span className="editor__pickerLabel">TEMA SPIDER-VERSE</span>
           <div className="themeSelector">
@@ -317,6 +334,14 @@ export default function StripPreview({
             }}
           />
         </div>
+      )}
+
+      {shareDataUrl && (
+        <ShareModal
+          stripDataUrl={shareDataUrl}
+          themeName={activeTheme.name}
+          onClose={() => setShareDataUrl(null)}
+        />
       )}
     </div>
   )
