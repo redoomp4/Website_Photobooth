@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import { STICKERS, svgToDataUri } from '../stickers/stickerData'
 import { renderStrip, SPIDER_THEMES } from '../utils/compositor'
 import RetakeModal from './RetakeModal'
+import DoodleCanvas from './DoodleCanvas'
+import ShareModal from './ShareModal'
 
 const REF_W = 640
 const REF_H = 480
@@ -27,6 +29,9 @@ export default function StripPreview({
   const [selected, setSelected] = useState(null) // { cellIndex, uid }
   const [busy, setBusy] = useState(false)
   const [retakeIndex, setRetakeIndex] = useState(null)
+  const [doodleEnabled, setDoodleEnabled] = useState(false)
+  const [shareDataUrl, setShareDataUrl] = useState(null)
+  const doodleCanvasRef = useRef(null)
   const cellRefs = useRef([])
   const dragRef = useRef(null)
 
@@ -34,7 +39,7 @@ export default function StripPreview({
   const activeTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
   function handleCellClick(cellIndex, e) {
-    if (!armedId) return
+    if (!armedId || doodleEnabled) return
     if (dragRef.current) return
     const rect = cellRefs.current[cellIndex].getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width
@@ -67,6 +72,7 @@ export default function StripPreview({
   }
 
   function onStickerPointerDown(cellIndex, uid, e) {
+    if (doodleEnabled) return
     e.stopPropagation()
     e.currentTarget.setPointerCapture(e.pointerId)
     dragRef.current = { cellIndex, uid, pointerId: e.pointerId }
@@ -74,7 +80,7 @@ export default function StripPreview({
   }
 
   function onStickerPointerMove(cellIndex, e) {
-    if (!dragRef.current || dragRef.current.cellIndex !== cellIndex) return
+    if (doodleEnabled || !dragRef.current || dragRef.current.cellIndex !== cellIndex) return
     const rect = cellRefs.current[cellIndex].getBoundingClientRect()
     const x = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
     const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height))
@@ -107,11 +113,15 @@ export default function StripPreview({
         title: 'COBWEB BOOTH',
         layout,
         captions,
+        doodleCanvas: doodleCanvasRef.current,
       })
       const a = document.createElement('a')
       a.href = dataUrl
       a.download = `cobweb-${themeId}-strip.png`
       a.click()
+
+      // Open Digital Photobooth Receipt Share Modal
+      setShareDataUrl(dataUrl)
     } finally {
       setBusy(false)
     }

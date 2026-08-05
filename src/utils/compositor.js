@@ -253,6 +253,11 @@ export async function renderStrip({
     canvas.height - pad - 15
   )
 
+  // Draw Doodle Layer on top if present
+  if (doodleCanvas) {
+    ctx.drawImage(doodleCanvas, 0, 0, canvas.width, canvas.height)
+  }
+
   return canvas.toDataURL('image/png')
 }
 
