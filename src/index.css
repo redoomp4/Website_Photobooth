@@ -1057,6 +1057,63 @@ img { max-width: 100%; display: block; }
   justify-content: space-between;
 }
 
+/* ---------------- Photo Adjuster ---------------- */
+.editor__adjustBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(11, 19, 48, 0.7);
+  color: var(--cream);
+  border: 1px solid rgba(245, 243, 238, 0.4);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+  z-index: 3;
+}
+.editor__adjustBtn:hover, .editor__adjustBtn.is-active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.editor__cell.is-adjusting {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+  box-shadow: 0 0 15px rgba(255, 200, 87, 0.4);
+}
+
+.editor__adjustControls {
+  background: rgba(245, 243, 238, 0.06);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: adjustPanelFade 0.25s ease-out;
+}
+@keyframes adjustPanelFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.editor__controlLabel {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.72rem;
+  gap: 6px;
+  color: rgba(245, 243, 238, 0.85);
+  font-weight: 600;
+}
+
+.editor__adjustButtons {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.editor__adjustButtons button {
+  flex: 1;
+}
+
 /* ---------------- Responsive ---------------- */
 @media (max-width: 720px) {
   .editor { grid-template-columns: 1fr; }
