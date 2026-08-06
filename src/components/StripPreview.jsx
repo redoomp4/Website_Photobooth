@@ -162,58 +162,79 @@ export default function StripPreview({
           {activeTheme.badge} COBWEB BOOTH {activeTheme.badge}
         </h2>
 
-        {photos.map((src, i) => (
-          <div key={i} className="editor__cellWrap">
-            <div
-              ref={(el) => (cellRefs.current[i] = el)}
-              className="editor__cell"
-              style={{
-                aspectRatio: `${REF_W}/${REF_H}`,
-                borderColor: activeTheme.accentColor || 'rgba(0,0,0,0.3)',
-              }}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleCellClick(i, e)
-              }}
-              onPointerMove={(e) => onStickerPointerMove(i, e)}
-            >
-              <img src={src} className="editor__photo" alt={`Jepretan ${i + 1}`} />
-              {placements[i].map((p) => {
-                const st = stickerById(p.stickerId)
-                const isSel = selected && selected.uid === p.uid
-                return (
-                  <img
-                    key={p.uid}
-                    src={svgToDataUri(st[p.mode])}
-                    alt={st.name}
-                    className={`editor__sticker ${isSel ? 'is-selected' : ''}`}
-                    style={{
-                      left: `${p.x * 100}%`,
-                      top: `${p.y * 100}%`,
-                      width: p.size,
-                      height: p.size,
-                      transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
-                    }}
-                    onPointerDown={(e) => onStickerPointerDown(i, p.uid, e)}
-                    onPointerUp={onStickerPointerUp}
-                    onClick={(e) => e.stopPropagation()}
-                    draggable={false}
-                  />
-                )
-              })}
-              <button
-                className="editor__retakeBtn"
+        {photos.map((src, i) => {
+          const adj = adjustments[i]
+          const isAdjusting = adjustingIndex === i
+          return (
+            <div key={i} className="editor__cellWrap">
+              <div
+                ref={(el) => (cellRefs.current[i] = el)}
+                className={`editor__cell ${isAdjusting ? 'is-adjusting' : ''}`}
+                style={{
+                  aspectRatio: `${REF_W}/${REF_H}`,
+                  borderColor: activeTheme.accentColor || 'rgba(0,0,0,0.3)',
+                }}
                 onClick={(e) => {
                   e.stopPropagation()
-                  setRetakeIndex(i)
+                  handleCellClick(i, e)
                 }}
+                onPointerMove={(e) => onStickerPointerMove(i, e)}
               >
-                ⟲ Ambil ulang
-              </button>
+                <img
+                  src={src}
+                  className="editor__photo"
+                  alt={`Jepretan ${i + 1}`}
+                  style={{
+                    transform: `scaleX(${adj.mirrored ? -1 : 1}) scale(${adj.zoom}) translate(${adj.x * 100}%, ${adj.y * 100}%) rotate(${adj.rotation}deg)`,
+                    transition: 'none',
+                  }}
+                />
+                {placements[i].map((p) => {
+                  const st = stickerById(p.stickerId)
+                  const isSel = selected && selected.uid === p.uid
+                  return (
+                    <img
+                      key={p.uid}
+                      src={svgToDataUri(st[p.mode])}
+                      alt={st.name}
+                      className={`editor__sticker ${isSel ? 'is-selected' : ''}`}
+                      style={{
+                        left: `${p.x * 100}%`,
+                        top: `${p.y * 100}%`,
+                        width: p.size,
+                        height: p.size,
+                        transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
+                      }}
+                      onPointerDown={(e) => onStickerPointerDown(i, p.uid, e)}
+                      onPointerUp={onStickerPointerUp}
+                      onClick={(e) => e.stopPropagation()}
+                      draggable={false}
+                    />
+                  )
+                })}
+                <button
+                  className="editor__retakeBtn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setRetakeIndex(i)
+                  }}
+                >
+                  ⟲ Ambil ulang
+                </button>
+                <button
+                  className={`editor__adjustBtn ${isAdjusting ? 'is-active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAdjustingIndex(isAdjusting ? null : i)
+                  }}
+                >
+                  ⚙️ Sesuaikan
+                </button>
+              </div>
+              {captions[i] && <div className="editor__captionPreview">{captions[i]}</div>}
             </div>
-            {captions[i] && <div className="editor__captionPreview">{captions[i]}</div>}
-          </div>
-        ))}
+          )
+        })}
 
         <div className="editor__footer" style={{ color: activeTheme.textColor }}>
           {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
