@@ -31,6 +31,10 @@ export default function StripPreview({
   const [retakeIndex, setRetakeIndex] = useState(null)
   const [doodleEnabled, setDoodleEnabled] = useState(false)
   const [shareDataUrl, setShareDataUrl] = useState(null)
+  const [adjustments, setAdjustments] = useState(() =>
+    photos.map(() => ({ zoom: 1, x: 0, y: 0, mirrored: false, rotation: 0 }))
+  )
+  const [adjustingIndex, setAdjustingIndex] = useState(null)
   const doodleCanvasRef = useRef(null)
   const cellRefs = useRef([])
   const dragRef = useRef(null)
@@ -39,6 +43,7 @@ export default function StripPreview({
   const activeTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
   function handleCellClick(cellIndex, e) {
+    if (adjustingIndex !== null) return
     if (!armedId || doodleEnabled) return
     if (dragRef.current) return
     const rect = cellRefs.current[cellIndex].getBoundingClientRect()
@@ -61,6 +66,12 @@ export default function StripPreview({
     })
   }
 
+  function updateAdjustment(index, patch) {
+    setAdjustments((prev) =>
+      prev.map((adj, idx) => (idx === index ? { ...adj, ...patch } : adj))
+    )
+  }
+
   function removeSelected() {
     if (!selected) return
     setPlacements((prev) => {
@@ -72,7 +83,7 @@ export default function StripPreview({
   }
 
   function onStickerPointerDown(cellIndex, uid, e) {
-    if (doodleEnabled) return
+    if (doodleEnabled || adjustingIndex !== null) return
     e.stopPropagation()
     e.currentTarget.setPointerCapture(e.pointerId)
     dragRef.current = { cellIndex, uid, pointerId: e.pointerId }
@@ -80,7 +91,7 @@ export default function StripPreview({
   }
 
   function onStickerPointerMove(cellIndex, e) {
-    if (doodleEnabled || !dragRef.current || dragRef.current.cellIndex !== cellIndex) return
+    if (doodleEnabled || adjustingIndex !== null || !dragRef.current || dragRef.current.cellIndex !== cellIndex) return
     const rect = cellRefs.current[cellIndex].getBoundingClientRect()
     const x = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
     const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height))
@@ -114,6 +125,7 @@ export default function StripPreview({
         layout,
         captions,
         doodleCanvas: doodleCanvasRef.current,
+        adjustments,
       })
       const a = document.createElement('a')
       a.href = dataUrl
