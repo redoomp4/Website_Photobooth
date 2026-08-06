@@ -248,6 +248,83 @@ export default function StripPreview({
       </div>
 
       <div className="editor__controls" onClick={(e) => e.stopPropagation()}>
+        {adjustingIndex !== null && (
+          <div className="editor__adjustControls">
+            <span className="editor__pickerLabel">SESUAIKAN FOTO {adjustingIndex + 1}</span>
+            
+            <label className="editor__controlLabel">
+              Zoom ({Math.round(adjustments[adjustingIndex].zoom * 100)}%)
+              <input
+                type="range"
+                min="1"
+                max="2.5"
+                step="0.05"
+                value={adjustments[adjustingIndex].zoom}
+                onChange={(e) =>
+                  updateAdjustment(adjustingIndex, { zoom: parseFloat(e.target.value) })
+                }
+              />
+            </label>
+
+            <label className="editor__controlLabel">
+              Geser Horisontal (X)
+              <input
+                type="range"
+                min="-0.5"
+                max="0.5"
+                step="0.02"
+                value={adjustments[adjustingIndex].x}
+                onChange={(e) =>
+                  updateAdjustment(adjustingIndex, { x: parseFloat(e.target.value) })
+                }
+              />
+            </label>
+
+            <label className="editor__controlLabel">
+              Geser Vertikal (Y)
+              <input
+                type="range"
+                min="-0.5"
+                max="0.5"
+                step="0.02"
+                value={adjustments[adjustingIndex].y}
+                onChange={(e) =>
+                  updateAdjustment(adjustingIndex, { y: parseFloat(e.target.value) })
+                }
+              />
+            </label>
+
+            <div className="editor__adjustButtons">
+              <button
+                className={`btn btn--sm ${adjustments[adjustingIndex].mirrored ? 'btn--primary' : 'btn--ghost'}`}
+                onClick={() =>
+                  updateAdjustment(adjustingIndex, { mirrored: !adjustments[adjustingIndex].mirrored })
+                }
+              >
+                🪞 Cermin (Mirror)
+              </button>
+              <button
+                className="btn btn--ghost btn--sm"
+                onClick={() =>
+                  updateAdjustment(adjustingIndex, {
+                    rotation: (adjustments[adjustingIndex].rotation + 90) % 360,
+                  })
+                }
+              >
+                🔄 Putar 90°
+              </button>
+            </div>
+
+            <button
+              className="btn btn--primary btn--sm"
+              style={{ marginTop: '6px' }}
+              onClick={() => setAdjustingIndex(null)}
+            >
+              Selesai Menyesuaikan
+            </button>
+          </div>
+        )}
+
         <div className="editor__doodleToggle">
           <span>MODE CORET-CORET / DOODLE</span>
           <button
