@@ -103,6 +103,36 @@ export const SPIDER_THEMES = [
   },
 ]
 
+function drawPhotoWithAdjustments(ctx, img, slotX, slotY, slotW, slotH, adj = {}) {
+  const { zoom = 1, x: offsetX = 0, y: offsetY = 0, mirrored = false, rotation = 0 } = adj
+  ctx.save()
+  
+  // Clip to slot rectangle so nothing bleeds out
+  ctx.beginPath()
+  ctx.rect(slotX, slotY, slotW, slotH)
+  ctx.clip()
+
+  // Move origin to center of slot
+  ctx.translate(slotX + slotW / 2, slotY + slotH / 2)
+
+  // Apply rotation
+  if (rotation) {
+    ctx.rotate((rotation * Math.PI) / 180)
+  }
+
+  // Apply mirroring and zoom
+  const scaleX = mirrored ? -zoom : zoom
+  const scaleY = zoom
+  ctx.scale(scaleX, scaleY)
+
+  // Draw scaled and panned image centered
+  const drawX = -slotW / 2 + offsetX * slotW
+  const drawY = -slotH / 2 + offsetY * slotH
+
+  ctx.drawImage(img, drawX, drawY, slotW, slotH)
+  ctx.restore()
+}
+
 // Build the final downloadable strip: header, N photos (each with placed stickers + optional
 // caption), colored frame, footer. Supports Spiderman PNG template mode or custom Spider-Verse themes.
 export async function renderStrip({
@@ -114,6 +144,7 @@ export async function renderStrip({
   layout = 'strip',
   captions = [],
   doodleCanvas = null,
+  adjustments = [],
 }) {
   const selectedTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
@@ -135,7 +166,9 @@ export async function renderStrip({
     for (let i = 0; i < Math.min(photos.length, 3); i++) {
       const slot = slots[i]
       const img = await loadImage(photos[i])
-      ctx.drawImage(img, slot.x, slot.y, slot.w, slot.h)
+      
+      // Draw photo with custom user zoom / pan / mirror / rotate adjustments
+      drawPhotoWithAdjustments(ctx, img, slot.x, slot.y, slot.w, slot.h, adjustments[i])
 
       // Draw stickers placed on this cell
       const stickersForCell = placements[i] || []
@@ -214,7 +247,9 @@ export async function renderStrip({
     const y = headerH + pad + row * (cellH + captionH + gap)
 
     const img = await loadImage(photos[i])
-    ctx.drawImage(img, x, y, cellW, cellH)
+    
+    // Draw photo with adjustments
+    drawPhotoWithAdjustments(ctx, img, x, y, cellW, cellH, adjustments[i])
 
     // Cell border
     ctx.strokeStyle = selectedTheme?.accentColor || '#FFC857'
