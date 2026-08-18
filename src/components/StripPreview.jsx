@@ -4,6 +4,9 @@ import { renderStrip, SPIDER_THEMES } from '../utils/compositor'
 import RetakeModal from './RetakeModal'
 import DoodleCanvas from './DoodleCanvas'
 import ShareModal from './ShareModal'
+import HeroIdCardModal from './HeroIdCardModal'
+import GifPreviewModal from './GifPreviewModal'
+import SpeechBubbleModal from './SpeechBubbleModal'
 
 const REF_W = 640
 const REF_H = 480
@@ -21,6 +24,8 @@ export default function StripPreview({
   filterCss,
   countdownFrom,
   muted,
+  customBubbles = [],
+  onAddCustomBubble,
 }) {
   const [placements, setPlacements] = useState(() => photos.map(() => []))
   const [captions, setCaptions] = useState(() => photos.map(() => ''))
@@ -31,6 +36,9 @@ export default function StripPreview({
   const [retakeIndex, setRetakeIndex] = useState(null)
   const [doodleEnabled, setDoodleEnabled] = useState(false)
   const [shareDataUrl, setShareDataUrl] = useState(null)
+  const [idCardOpen, setIdCardOpen] = useState(false)
+  const [gifOpen, setGifOpen] = useState(false)
+  const [bubbleModalOpen, setBubbleModalOpen] = useState(false)
   const [adjustments, setAdjustments] = useState(() =>
     photos.map(() => ({ zoom: 1, x: 0, y: 0, mirrored: false, rotation: 0 }))
   )
@@ -39,7 +47,14 @@ export default function StripPreview({
   const cellRefs = useRef([])
   const dragRef = useRef(null)
 
-  const stickerById = (id) => STICKERS.find((s) => s.id === id)
+  const stickerById = (id) => {
+    const standard = STICKERS.find((s) => s.id === id)
+    if (standard) return standard
+    const custom = customBubbles.find((b) => b.id === id)
+    if (custom) return { id: custom.id, name: custom.name, anime: custom.dataUri, pixel: custom.dataUri, isCustom: true }
+    return null
+  }
+
   const activeTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
   function handleCellClick(cellIndex, e) {
@@ -52,7 +67,7 @@ export default function StripPreview({
     const uid = nextUid()
     setPlacements((prev) => {
       const copy = prev.map((arr) => [...arr])
-      copy[cellIndex].push({ uid, stickerId: armedId, mode, x, y, size: 130, rotation: 0 })
+      copy[cellIndex].push({ uid, stickerId: armedId, mode, x, y, size: 140, rotation: 0 })
       return copy
     })
     setSelected({ cellIndex, uid })
@@ -109,13 +124,17 @@ export default function StripPreview({
     setBusy(true)
     try {
       const stickerPlacements = placements.map((cellArr) =>
-        cellArr.map((p) => ({
-          x: p.x,
-          y: p.y,
-          rotation: p.rotation,
-          size: (p.size / 200) * REF_W * 0.55,
-          src: svgToDataUri(stickerById(p.stickerId)[p.mode]),
-        }))
+        cellArr.map((p) => {
+          const st = stickerById(p.stickerId)
+          const srcUri = st?.isCustom ? st.anime : svgToDataUri(st[p.mode])
+          return {
+            x: p.x,
+            y: p.y,
+            rotation: p.rotation,
+            size: (p.size / 200) * REF_W * 0.55,
+            src: srcUri,
+          }
+        })
       )
       const dataUrl = await renderStrip({
         photos,
@@ -141,6 +160,19 @@ export default function StripPreview({
 
   return (
     <div className="editor" onClick={() => setSelected(null)}>
+      {/* Studio Top Special Features Bar */}
+      <div className="editor__featureBar" onClick={(e) => e.stopPropagation()}>
+        <button className="btn-feature-item" onClick={() => setIdCardOpen(true)}>
+          🪪 Kartu Anggota Spider-Society
+        </button>
+        <button className="btn-feature-item" onClick={() => setGifOpen(true)}>
+          🎬 Animasi Reel (GIF)
+        </button>
+        <button className="btn-feature-item" onClick={() => setBubbleModalOpen(true)}>
+          💬 Buat Balon Komik
+        </button>
+      </div>
+
       <div
         className={`editor__strip ${layout === 'grid' ? 'editor__strip--grid' : ''} editor__strip--${themeId}`}
         style={{
@@ -191,11 +223,13 @@ export default function StripPreview({
                 />
                 {placements[i].map((p) => {
                   const st = stickerById(p.stickerId)
+                  if (!st) return null
                   const isSel = selected && selected.uid === p.uid
+                  const srcUri = st.isCustom ? st.anime : svgToDataUri(st[p.mode])
                   return (
                     <img
                       key={p.uid}
-                      src={svgToDataUri(st[p.mode])}
+                      src={srcUri}
                       alt={st.name}
                       className={`editor__sticker ${isSel ? 'is-selected' : ''}`}
                       style={{
@@ -237,7 +271,7 @@ export default function StripPreview({
         })}
 
         <div className="editor__footer" style={{ color: activeTheme.textColor }}>
-          {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+          MULTIVERSE PHOTOSTRIP // {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
         </div>
 
         {/* Doodle Drawing Layer Overlay */}
@@ -251,7 +285,7 @@ export default function StripPreview({
         {adjustingIndex !== null && (
           <div className="editor__adjustControls">
             <span className="editor__pickerLabel">SESUAIKAN FOTO {adjustingIndex + 1}</span>
-            
+
             <label className="editor__controlLabel">
               Zoom ({Math.round(adjustments[adjustingIndex].zoom * 100)}%)
               <input
@@ -326,18 +360,18 @@ export default function StripPreview({
         )}
 
         <div className="editor__doodleToggle">
-          <span>MODE CORET-CORET / DOODLE</span>
+          <span>MODE CORETAN &amp; NEON SPRAY</span>
           <button
             className={`btn ${doodleEnabled ? 'btn--primary' : 'btn--ghost'}`}
             style={{ width: '100%' }}
             onClick={() => setDoodleEnabled((d) => !d)}
           >
-            {doodleEnabled ? '✏️ MATIKAN CORETAN' : '🎨 CORET-CORET JARING (PEN)'}
+            {doodleEnabled ? '✏️ MATIKAN CORETAN' : '🎨 CORET-CORET JARING (PEN/SPRAY)'}
           </button>
         </div>
 
         <div className="editor__themePicker">
-          <span className="editor__pickerLabel">TEMA SPIDER-VERSE</span>
+          <span className="editor__pickerLabel">TEMA BINGKAI SPIDER-VERSE</span>
           <div className="themeSelector">
             {SPIDER_THEMES.map((t) => (
               <button
@@ -357,13 +391,13 @@ export default function StripPreview({
         </div>
 
         <div className="editor__layoutToggle">
-          <span>LAYOUT</span>
+          <span>TATA LETAK (LAYOUT)</span>
           <div className="webshooter__track">
             <button
               className={`webshooter__btn ${layout === 'strip' ? 'is-active' : ''}`}
               onClick={() => setLayout('strip')}
             >
-              STRIP
+              STRIP VERTIKAL
             </button>
             <button
               className={`webshooter__btn ${layout === 'grid' ? 'is-active' : ''}`}
@@ -375,7 +409,7 @@ export default function StripPreview({
         </div>
 
         <div className="editor__captions">
-          <span>CAPTION PER FOTO</span>
+          <span>CAPTION KOMIK PER FOTO</span>
           {photos.map((_, i) => (
             <input
               key={i}
@@ -400,7 +434,7 @@ export default function StripPreview({
               <input
                 type="range"
                 min="60"
-                max="260"
+                max="280"
                 value={selectedPlacement.size}
                 onChange={(e) =>
                   updatePlacement(selected.cellIndex, selected.uid, { size: Number(e.target.value) })
@@ -411,22 +445,22 @@ export default function StripPreview({
               Putar
               <input
                 type="range"
-                min="-45"
-                max="45"
+                min="-180"
+                max="180"
                 value={selectedPlacement.rotation}
                 onChange={(e) =>
                   updatePlacement(selected.cellIndex, selected.uid, { rotation: Number(e.target.value) })
                 }
               />
             </label>
-            <button className="btn btn--ghost" onClick={removeSelected}>Hapus stiker</button>
+            <button className="btn btn--ghost" onClick={removeSelected}>🗑️ Hapus Stiker</button>
           </div>
         )}
 
         <div className="editor__actions">
-          <button className="btn btn--ghost" onClick={onRestart}>Ulangi Sesi</button>
+          <button className="btn btn--ghost" onClick={onRestart}>⟲ Sesi Baru</button>
           <button className="btn btn--primary" onClick={handleDownload} disabled={busy}>
-            {busy ? 'MENYUSUN…' : 'UNDUH STRIP'}
+            {busy ? 'MENYUSUN STRIP…' : '📥 UNDUH STRIP FOTO'}
           </button>
         </div>
       </div>
@@ -445,6 +479,31 @@ export default function StripPreview({
           />
         </div>
       )}
+
+      {/* Spider-Society ID Card Modal */}
+      <HeroIdCardModal
+        isOpen={idCardOpen}
+        onClose={() => setIdCardOpen(false)}
+        photos={photos}
+        muted={muted}
+      />
+
+      {/* Animated Reel / Looping GIF Preview Modal */}
+      <GifPreviewModal
+        isOpen={gifOpen}
+        onClose={() => setGifOpen(false)}
+        photos={photos}
+        muted={muted}
+      />
+
+      {/* Speech Bubble Creator Modal */}
+      <SpeechBubbleModal
+        isOpen={bubbleModalOpen}
+        onClose={() => setBubbleModalOpen(false)}
+        onAddBubble={(bubble) => {
+          onAddCustomBubble(bubble)
+        }}
+      />
 
       {shareDataUrl && (
         <ShareModal
