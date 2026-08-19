@@ -7,6 +7,7 @@ import ShareModal from './ShareModal'
 import HeroIdCardModal from './HeroIdCardModal'
 import GifPreviewModal from './GifPreviewModal'
 import SpeechBubbleModal from './SpeechBubbleModal'
+import ComicCoverModal from './ComicCoverModal'
 
 const REF_W = 640
 const REF_H = 480
@@ -38,7 +39,10 @@ export default function StripPreview({
   const [shareDataUrl, setShareDataUrl] = useState(null)
   const [idCardOpen, setIdCardOpen] = useState(false)
   const [gifOpen, setGifOpen] = useState(false)
+  const [comicCoverOpen, setComicCoverOpen] = useState(false)
   const [bubbleModalOpen, setBubbleModalOpen] = useState(false)
+  const [locationTag, setLocationTag] = useState('JAKARTA METRO SECTOR // SPIDER-SOCIETY')
+
   const [adjustments, setAdjustments] = useState(() =>
     photos.map(() => ({ zoom: 1, x: 0, y: 0, mirrored: false, rotation: 0 }))
   )
@@ -67,7 +71,7 @@ export default function StripPreview({
     const uid = nextUid()
     setPlacements((prev) => {
       const copy = prev.map((arr) => [...arr])
-      copy[cellIndex].push({ uid, stickerId: armedId, mode, x, y, size: 140, rotation: 0 })
+      copy[cellIndex].push({ uid, stickerId: armedId, mode, x, y, size: 140, rotation: 0, flipped: false })
       return copy
     })
     setSelected({ cellIndex, uid })
@@ -165,6 +169,9 @@ export default function StripPreview({
         <button className="btn-feature-item" onClick={() => setIdCardOpen(true)}>
           🪪 Kartu Anggota Spider-Society
         </button>
+        <button className="btn-feature-item" onClick={() => setComicCoverOpen(true)}>
+          📖 Poster Sampul Komik
+        </button>
         <button className="btn-feature-item" onClick={() => setGifOpen(true)}>
           🎬 Animasi Reel (GIF)
         </button>
@@ -227,23 +234,65 @@ export default function StripPreview({
                   const isSel = selected && selected.uid === p.uid
                   const srcUri = st.isCustom ? st.anime : svgToDataUri(st[p.mode])
                   return (
-                    <img
+                    <div
                       key={p.uid}
-                      src={srcUri}
-                      alt={st.name}
-                      className={`editor__sticker ${isSel ? 'is-selected' : ''}`}
+                      className={`sticker-wrapper ${isSel ? 'is-selected' : ''}`}
                       style={{
+                        position: 'absolute',
                         left: `${p.x * 100}%`,
                         top: `${p.y * 100}%`,
                         width: p.size,
                         height: p.size,
                         transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
+                        zIndex: isSel ? 50 : 20,
                       }}
                       onPointerDown={(e) => onStickerPointerDown(i, p.uid, e)}
                       onPointerUp={onStickerPointerUp}
                       onClick={(e) => e.stopPropagation()}
-                      draggable={false}
-                    />
+                    >
+                      <img
+                        src={srcUri}
+                        alt={st.name}
+                        className="editor__sticker-img"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          transform: p.flipped ? 'scaleX(-1)' : 'none',
+                        }}
+                        draggable={false}
+                      />
+
+                      {/* Direct Floating Transform Handles on Selected Sticker */}
+                      {isSel && (
+                        <div className="sticker-floating-handles" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="handle-btn handle-delete"
+                            title="Hapus Stiker"
+                            onClick={removeSelected}
+                          >
+                            ✕
+                          </button>
+                          <button
+                            className="handle-btn handle-rotate"
+                            title="Putar 45 Derajat"
+                            onClick={() =>
+                              updatePlacement(i, p.uid, { rotation: (p.rotation + 45) % 360 })
+                            }
+                          >
+                            🔄
+                          </button>
+                          <button
+                            className="handle-btn handle-flip"
+                            title="Cermin / Balik"
+                            onClick={() =>
+                              updatePlacement(i, p.uid, { flipped: !p.flipped })
+                            }
+                          >
+                            🪞
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
                 <button
@@ -271,7 +320,7 @@ export default function StripPreview({
         })}
 
         <div className="editor__footer" style={{ color: activeTheme.textColor }}>
-          MULTIVERSE PHOTOSTRIP // {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+          {locationTag} // {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
         </div>
 
         {/* Doodle Drawing Layer Overlay */}
@@ -426,14 +475,25 @@ export default function StripPreview({
           ))}
         </div>
 
+        <div className="form-group" style={{ marginBottom: 0 }}>
+          <span className="editor__pickerLabel">LOKASI / STAMP FOOTER</span>
+          <input
+            type="text"
+            className="editor__captionInput"
+            value={locationTag}
+            maxLength={35}
+            onChange={(e) => setLocationTag(e.target.value)}
+          />
+        </div>
+
         {selectedPlacement && (
           <div className="editor__stickerControls">
-            <span>STIKER TERPILIH</span>
+            <span>KONTROL STIKER TERPILIH</span>
             <label>
-              Ukuran
+              Ukuran ({selectedPlacement.size}px)
               <input
                 type="range"
-                min="60"
+                min="50"
                 max="280"
                 value={selectedPlacement.size}
                 onChange={(e) =>
@@ -442,7 +502,7 @@ export default function StripPreview({
               />
             </label>
             <label>
-              Putar
+              Putar ({selectedPlacement.rotation}°)
               <input
                 type="range"
                 min="-180"
@@ -453,7 +513,21 @@ export default function StripPreview({
                 }
               />
             </label>
-            <button className="btn btn--ghost" onClick={removeSelected}>🗑️ Hapus Stiker</button>
+            <div className="button-group-row">
+              <button
+                className="btn btn--ghost btn--sm"
+                onClick={() =>
+                  updatePlacement(selected.cellIndex, selected.uid, {
+                    flipped: !selectedPlacement.flipped,
+                  })
+                }
+              >
+                🪞 Balik (Flip)
+              </button>
+              <button className="btn btn--ghost btn--sm" onClick={removeSelected}>
+                🗑️ Hapus
+              </button>
+            </div>
           </div>
         )}
 
@@ -484,6 +558,14 @@ export default function StripPreview({
       <HeroIdCardModal
         isOpen={idCardOpen}
         onClose={() => setIdCardOpen(false)}
+        photos={photos}
+        muted={muted}
+      />
+
+      {/* Comic Cover Magazine Poster Modal */}
+      <ComicCoverModal
+        isOpen={comicCoverOpen}
+        onClose={() => setComicCoverOpen(false)}
         photos={photos}
         muted={muted}
       />
