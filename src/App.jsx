@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppHeader from './components/AppHeader'
 import WebParticleEffect from './components/WebParticleEffect'
 import ComicToggle from './components/ComicToggle'
@@ -21,6 +21,12 @@ export default function App() {
   const [muted, setMuted] = useState(false)
   const [customBubbles, setCustomBubbles] = useState([])
   const [bubbleModalOpen, setBubbleModalOpen] = useState(false)
+  const [activeDimension, setActiveDimension] = useState('earth616')
+
+  // Set CSS class on root container according to active dimension
+  useEffect(() => {
+    document.documentElement.setAttribute('data-dimension', activeDimension)
+  }, [activeDimension])
 
   const filterCss = FILTERS.find((f) => f.id === filterId)?.css || 'none'
 
@@ -41,15 +47,17 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app dimension--${activeDimension}`}>
       {/* Interactive Web Particle Canvas */}
-      <WebParticleEffect />
+      <WebParticleEffect dimension={activeDimension} />
 
       {/* Spider-Verse Brand Header & Audio Engine */}
       <AppHeader
         stage={stage}
         muted={muted}
         onToggleMute={() => setMuted((m) => !m)}
+        activeDimension={activeDimension}
+        onSelectDimension={setActiveDimension}
       />
 
       <div className="app__crackbg" aria-hidden />
@@ -92,7 +100,7 @@ export default function App() {
               <div className="tip-card">
                 <span className="tip-icon">🪪</span>
                 <div className="tip-text">
-                  <strong>Multiverse ID &amp; Reel:</strong> Di layar edit, kamu bisa membuat Kartu Anggota Spider-Society &amp; animasi GIF loop!
+                  <strong>Multiverse ID &amp; Cover:</strong> Di layar edit, buat Kartu Anggota Spider-Society &amp; Sampul Majalah Komik Marvel!
                 </div>
               </div>
             </div>
