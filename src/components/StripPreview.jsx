@@ -41,6 +41,7 @@ export default function StripPreview({
   const [idCardOpen, setIdCardOpen] = useState(false)
   const [gifOpen, setGifOpen] = useState(false)
   const [comicCoverOpen, setComicCoverOpen] = useState(false)
+  const [canonEventOpen, setCanonEventOpen] = useState(false)
   const [bubbleModalOpen, setBubbleModalOpen] = useState(false)
   const [locationTag, setLocationTag] = useState('JAKARTA METRO SECTOR // SPIDER-SOCIETY')
 
