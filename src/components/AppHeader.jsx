@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { playThwip, playShutter, playSpiderSense, playBoom } from '../utils/sound'
+import AudioPlayerWidget from './AudioPlayerWidget'
 
 const MULTIVERSE_DIMENSIONS = [
   { id: 'earth616', name: 'EARTH-616', alias: 'Prime Spidey', color: '#E63946', glow: 'rgba(230,57,70,0.5)' },
