@@ -8,6 +8,7 @@ import HeroIdCardModal from './HeroIdCardModal'
 import GifPreviewModal from './GifPreviewModal'
 import SpeechBubbleModal from './SpeechBubbleModal'
 import ComicCoverModal from './ComicCoverModal'
+import CanonEventScannerModal from './CanonEventScannerModal'
 
 const REF_W = 640
 const REF_H = 480
