@@ -5,25 +5,27 @@ const COLOR_PALETTE = [
   { id: 'red', name: 'Electric Red', hex: '#E63946' },
   { id: 'cyan', name: 'Neon Cyan', hex: '#00E5FF' },
   { id: 'pink', name: 'Gwen Pink', hex: '#FF007F' },
-  { id: 'gold', name: 'Gold', hex: '#FFC857' },
+  { id: 'gold', name: 'Gold', hex: '#FFE600' },
   { id: 'green', name: 'Slime Green', hex: '#10B981' },
 ]
 
-const BRUSH_SIZES = [
-  { id: 'thin', name: 'Tipis', size: 3 },
-  { id: 'med', name: 'Sedang', size: 8 },
-  { id: 'bold', name: 'Tebal', size: 16 },
+const BRUSH_TYPES = [
+  { id: 'neon', name: '🖍️ Neon Marker' },
+  { id: 'web', name: '🕸️ Spider-Web' },
+  { id: 'spray', name: '🎨 Graffiti Spray' },
+  { id: 'spark', name: '⚡ Electric Spark' },
 ]
 
 export default function DoodleCanvas({ enabled, onCanvasReady }) {
   const canvasRef = useRef(null)
   const [color, setColor] = useState(COLOR_PALETTE[0].hex)
-  const [brushSize, setBrushSize] = useState(8)
-  const [isGlow, setIsGlow] = useState(true)
+  const [brushSize, setBrushSize] = useState(6)
+  const [brushType, setBrushType] = useState('neon')
   const [isEraser, setIsEraser] = useState(false)
   const [history, setHistory] = useState([])
   const isDrawing = useRef(false)
   const lastPoint = useRef(null)
+  const webPoints = useRef([])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -65,6 +67,7 @@ export default function DoodleCanvas({ enabled, onCanvasReady }) {
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     setHistory([])
+    webPoints.current = []
   }
 
   const getCanvasCoords = (e) => {
@@ -81,7 +84,9 @@ export default function DoodleCanvas({ enabled, onCanvasReady }) {
   const startDrawing = (e) => {
     if (!enabled) return
     isDrawing.current = true
-    lastPoint.current = getCanvasCoords(e)
+    const pt = getCanvasCoords(e)
+    lastPoint.current = pt
+    webPoints.current = [pt]
     saveState()
   }
 
@@ -91,29 +96,77 @@ export default function DoodleCanvas({ enabled, onCanvasReady }) {
     const ctx = canvas.getContext('2d')
     const currentPoint = getCanvasCoords(e)
 
-    ctx.beginPath()
-    ctx.moveTo(lastPoint.current.x, lastPoint.current.y)
-    ctx.lineTo(currentPoint.x, currentPoint.y)
-
     if (isEraser) {
       ctx.globalCompositeOperation = 'destination-out'
-      ctx.lineWidth = brushSize * 2
-      ctx.lineCap = 'round'
-      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(currentPoint.x, currentPoint.y, brushSize * 2, 0, Math.PI * 2)
+      ctx.fill()
     } else {
       ctx.globalCompositeOperation = 'source-over'
-      ctx.lineWidth = brushSize
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      ctx.strokeStyle = color
 
-      if (isGlow) {
-        ctx.shadowBlur = brushSize * 1.5
+      if (brushType === 'neon') {
+        ctx.beginPath()
+        ctx.moveTo(lastPoint.current.x, lastPoint.current.y)
+        ctx.lineTo(currentPoint.x, currentPoint.y)
+        ctx.lineWidth = brushSize
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.strokeStyle = color
+        ctx.shadowBlur = brushSize * 2
         ctx.shadowColor = color
-      } else {
+        ctx.stroke()
+      } else if (brushType === 'spray') {
+        // Spray Paint Mist
+        const density = 25
+        const radius = brushSize * 3
         ctx.shadowBlur = 0
+        ctx.fillStyle = color
+        for (let i = 0; i < density; i++) {
+          const offsetX = (Math.random() - 0.5) * radius * 2
+          const offsetY = (Math.random() - 0.5) * radius * 2
+          if (offsetX * offsetX + offsetY * offsetY <= radius * radius) {
+            ctx.fillRect(currentPoint.x + offsetX, currentPoint.y + offsetY, 1.5, 1.5)
+          }
+        }
+      } else if (brushType === 'spark') {
+        // Bio-Electric Spark Lightning
+        ctx.beginPath()
+        ctx.moveTo(lastPoint.current.x, lastPoint.current.y)
+        const midX = (lastPoint.current.x + currentPoint.x) / 2 + (Math.random() - 0.5) * 14
+        const midY = (lastPoint.current.y + currentPoint.y) / 2 + (Math.random() - 0.5) * 14
+        ctx.lineTo(midX, midY)
+        ctx.lineTo(currentPoint.x, currentPoint.y)
+        ctx.lineWidth = brushSize * 0.8
+        ctx.strokeStyle = color
+        ctx.shadowBlur = 10
+        ctx.shadowColor = '#00E5FF'
+        ctx.stroke()
+      } else if (brushType === 'web') {
+        // Geometric Spider Web Connector
+        ctx.beginPath()
+        ctx.moveTo(lastPoint.current.x, lastPoint.current.y)
+        ctx.lineTo(currentPoint.x, currentPoint.y)
+        ctx.lineWidth = 1.5
+        ctx.strokeStyle = color
+        ctx.stroke()
+
+        webPoints.current.push(currentPoint)
+        // Connect nearby points like a web
+        for (let i = 0; i < webPoints.current.length; i += 2) {
+          const pt = webPoints.current[i]
+          const dx = currentPoint.x - pt.x
+          const dy = currentPoint.y - pt.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist > 15 && dist < 70) {
+            ctx.beginPath()
+            ctx.moveTo(currentPoint.x, currentPoint.y)
+            ctx.lineTo(pt.x, pt.y)
+            ctx.strokeStyle = `rgba(245, 243, 238, 0.4)`
+            ctx.lineWidth = 0.8
+            ctx.stroke()
+          }
+        }
       }
-      ctx.stroke()
     }
 
     lastPoint.current = currentPoint
@@ -141,7 +194,31 @@ export default function DoodleCanvas({ enabled, onCanvasReady }) {
       {enabled && (
         <div className="doodleToolbar" onClick={(e) => e.stopPropagation()}>
           <div className="doodleToolbar__section">
-            <span className="doodleToolbar__label">WARNA</span>
+            <span className="doodleToolbar__label">TIPE KUAS:</span>
+            <div className="doodleBrushTypes">
+              {BRUSH_TYPES.map((bt) => (
+                <button
+                  key={bt.id}
+                  className={`btn-tag btn-tag--sm ${brushType === bt.id && !isEraser ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setBrushType(bt.id)
+                    setIsEraser(false)
+                  }}
+                >
+                  {bt.name}
+                </button>
+              ))}
+              <button
+                className={`btn-tag btn-tag--sm ${isEraser ? 'is-active' : ''}`}
+                onClick={() => setIsEraser(true)}
+              >
+                🧹 Penghapus
+              </button>
+            </div>
+          </div>
+
+          <div className="doodleToolbar__section">
+            <span className="doodleToolbar__label">WARNA NEON:</span>
             <div className="doodleColors">
               {COLOR_PALETTE.map((c) => (
                 <button
@@ -155,43 +232,15 @@ export default function DoodleCanvas({ enabled, onCanvasReady }) {
                   }}
                 />
               ))}
-              <button
-                className={`doodleEraserBtn ${isEraser ? 'is-active' : ''}`}
-                onClick={() => setIsEraser(true)}
-                title="Penghapus"
-              >
-                🧹
-              </button>
             </div>
           </div>
 
-          <div className="doodleToolbar__section">
-            <span className="doodleToolbar__label">UKURAN</span>
-            <div className="doodleSizes">
-              {BRUSH_SIZES.map((b) => (
-                <button
-                  key={b.id}
-                  className={`doodleSizeBtn ${brushSize === b.size ? 'is-active' : ''}`}
-                  onClick={() => setBrushSize(b.size)}
-                >
-                  {b.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="doodleToolbar__section">
-            <button
-              className={`doodleGlowBtn ${isGlow ? 'is-active' : ''}`}
-              onClick={() => setIsGlow((g) => !g)}
-            >
-              ✨ Glow Neon
-            </button>
+          <div className="doodleToolbar__section" style={{ display: 'flex', gap: '6px' }}>
             <button className="btn btn--ghost btn--sm" onClick={handleUndo} disabled={history.length === 0}>
               ↩️ Undo
             </button>
             <button className="btn btn--ghost btn--sm" onClick={handleClear}>
-              🗑️ Clear
+              🗑️ Hapus Semua
             </button>
           </div>
         </div>
