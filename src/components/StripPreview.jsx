@@ -174,6 +174,9 @@ export default function StripPreview({
         <button className="btn-feature-item" onClick={() => setComicCoverOpen(true)}>
           📖 Poster Sampul Komik
         </button>
+        <button className="btn-feature-item" onClick={() => setCanonEventOpen(true)}>
+          ⚡ Scan Canon Event
+        </button>
         <button className="btn-feature-item" onClick={() => setGifOpen(true)}>
           🎬 Animasi Reel (GIF)
         </button>
@@ -568,6 +571,14 @@ export default function StripPreview({
       <ComicCoverModal
         isOpen={comicCoverOpen}
         onClose={() => setComicCoverOpen(false)}
+        photos={photos}
+        muted={muted}
+      />
+
+      {/* Spider-Society Canon Event Scanner Modal */}
+      <CanonEventScannerModal
+        isOpen={canonEventOpen}
+        onClose={() => setCanonEventOpen(false)}
         photos={photos}
         muted={muted}
       />
