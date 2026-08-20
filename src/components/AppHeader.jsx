@@ -99,6 +99,9 @@ export default function AppHeader({ stage, muted, onToggleMute, activeDimension 
         </div>
       )}
 
+      {/* Spider-Verse Lo-Fi Radio Player Widget */}
+      <AudioPlayerWidget muted={muted} />
+
       {/* Interactive Step / Stage Tracker */}
       <nav className="app__stepper">
         <div className={`step-node ${stage === 'setup' ? 'is-current' : stage === 'capture' || stage === 'edit' ? 'is-done' : ''}`}>

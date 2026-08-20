@@ -1681,6 +1681,256 @@ img {
   flex-wrap: wrap;
 }
 
+/* ---------------- Spider-Verse Radio Widget ---------------- */
+.radio-widget {
+  background: var(--ink-deep);
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 6px auto 14px;
+  box-shadow: 3px 3px 0 #000;
+  max-width: 360px;
+  width: 100%;
+}
+
+.radio-widget__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-radio-play {
+  background: var(--theme-accent);
+  border: 1.5px solid #000;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.btn-radio-play.is-playing {
+  animation: pulse-radio 1s infinite alternate;
+}
+
+@keyframes pulse-radio {
+  0% { transform: scale(1); box-shadow: 2px 2px 0 #000, 0 0 5px var(--theme-accent); }
+  100% { transform: scale(1.08); box-shadow: 2px 2px 0 #000, 0 0 12px var(--theme-accent); }
+}
+
+.radio-widget__info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.radio-track-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--gold);
+  line-height: 1.2;
+}
+
+.radio-track-style {
+  font-size: 10px;
+  color: var(--cyan);
+}
+
+.radio-widget__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+}
+
+.eq-bar {
+  width: 3px;
+  background: var(--cyan);
+  border-radius: 2px;
+  animation: eq-bounce 0.6s infinite alternate ease-in-out;
+}
+
+.bar-1 { height: 60%; animation-delay: 0.1s; }
+.bar-2 { height: 100%; animation-delay: 0.3s; }
+.bar-3 { height: 40%; animation-delay: 0.2s; }
+.bar-4 { height: 80%; animation-delay: 0.4s; }
+
+@keyframes eq-bounce {
+  0% { height: 20%; }
+  100% { height: 100%; }
+}
+
+.btn-radio-next {
+  background: var(--ink-light);
+  border: 1px solid #000;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+/* ---------------- Canon Event Scanner & Dossier Modal ---------------- */
+.modal--dossier {
+  max-width: 680px;
+}
+
+.scanner-animation-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+}
+
+.scanner-radar {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border: 2px solid var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.radar-sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg, transparent 60%, rgba(0, 229, 255, 0.4) 100%);
+  border-radius: 50%;
+  animation: sweep-spin 1.5s linear infinite;
+}
+
+@keyframes sweep-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-center-spider {
+  font-size: 32px;
+  z-index: 2;
+}
+
+.scanner-status-text {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--cyan);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.scanner-progress-bar {
+  width: 80%;
+  max-width: 320px;
+  height: 10px;
+  background: #000;
+  border: 1.5px solid var(--cyan);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.scanner-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--theme-accent));
+  transition: width 0.1s linear;
+}
+
+.dossier-results-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.anomaly-alert-card {
+  background: var(--ink-light);
+  border: 2px solid;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.anomaly-alert-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin: 6px 0 4px;
+  letter-spacing: 0.5px;
+}
+
+.anomaly-alert-card p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.alert-badge {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: #000;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.mission-brief-card {
+  background: var(--ink-light);
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.mission-label {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+.mission-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 6px 0 8px;
+}
+
+.agent-code-tag {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--cyan);
+}
+
+.dossier-preview-box {
+  display: flex;
+  justify-content: center;
+}
+
+.dossier-img {
+  max-width: 100%;
+  max-height: 60vh;
+  border-radius: 8px;
+  border: 3px solid #000;
+  box-shadow: 6px 6px 0 #000;
+}
+
+/* Doodle Toolbar Brush Types */
+.doodleBrushTypes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 /* ---------------- App Footer ---------------- */
 .app__footer {
   text-align: center;
