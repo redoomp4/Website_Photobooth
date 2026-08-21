@@ -163,6 +163,156 @@ function drawHalftoneDots(ctx, w, h, color = 'rgba(0,0,0,0.06)') {
   }
 }
 
+// Render 35mm Film Roll Layout
+async function renderFilmReel({ photos, placements, captions, adjustments, doodleCanvas }) {
+  const cellW = 580
+  const cellH = 420
+  const pad = 40
+  const sprocketW = 20
+  const sprocketH = 30
+  const gap = 34
+
+  const canvas = document.createElement('canvas')
+  canvas.width = cellW + pad * 2 + 60
+  canvas.height = pad * 2 + photos.length * (cellH + gap) + 40
+  const ctx = canvas.getContext('2d')
+
+  // Black Film Base
+  ctx.fillStyle = '#090A0F'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  // Sprocket Holes along left and right
+  ctx.fillStyle = '#1A1D2B'
+  for (let y = 20; y < canvas.height - 20; y += 45) {
+    // Left sprockets
+    ctx.fillRect(15, y, sprocketW, sprocketH)
+    // Right sprockets
+    ctx.fillRect(canvas.width - 35, y, sprocketW, sprocketH)
+  }
+
+  // Draw Film Edge Codes
+  ctx.fillStyle = '#FFE600'
+  ctx.font = '700 13px "Press Start 2P", monospace'
+  ctx.save()
+  ctx.translate(45, canvas.height / 2)
+  ctx.rotate(-Math.PI / 2)
+  ctx.fillText('KODAK SPIDEY 400 · MULTIVERSE NEGATIVE', 0, 0)
+  ctx.restore()
+
+  for (let i = 0; i < photos.length; i++) {
+    const x = pad + 30
+    const y = pad + i * (cellH + gap)
+
+    const img = await loadImage(photos[i])
+    drawPhotoWithAdjustments(ctx, img, x, y, cellW, cellH, adjustments[i])
+
+    // Thin frame border
+    ctx.strokeStyle = '#333'
+    ctx.lineWidth = 3
+    ctx.strokeRect(x, y, cellW, cellH)
+
+    // Exposure frame number
+    ctx.fillStyle = '#FFE600'
+    ctx.font = '800 14px Manrope, sans-serif'
+    ctx.fillText(`FRAME #${i + 1}A`, x + 10, y + cellH + 20)
+
+    // Draw stickers
+    const stickersForCell = placements[i] || []
+    for (const p of stickersForCell) {
+      const stImg = await loadImage(p.src)
+      const size = p.size
+      ctx.save()
+      const cx = x + p.x * cellW
+      const cy = y + p.y * cellH
+      ctx.translate(cx, cy)
+      ctx.rotate(((p.rotation || 0) * Math.PI) / 180)
+      ctx.drawImage(stImg, -size / 2, -size / 2, size, size)
+      ctx.restore()
+    }
+  }
+
+  if (doodleCanvas) {
+    ctx.drawImage(doodleCanvas, 0, 0, canvas.width, canvas.height)
+  }
+
+  return canvas.toDataURL('image/png')
+}
+
+// Render Polaroid Trio Layout
+async function renderPolaroidTrio({ photos, placements, captions, adjustments, doodleCanvas }) {
+  const canvas = document.createElement('canvas')
+  canvas.width = 800
+  canvas.height = 1180
+  const ctx = canvas.getContext('2d')
+
+  // Background Wood / Desk Surface
+  ctx.fillStyle = '#1A1025'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  drawHalftoneDots(ctx, canvas.width, canvas.height, 'rgba(230, 57, 70, 0.08)')
+
+  const angles = [-3, 2.5, -1.8]
+  const cardW = 540
+  const cardH = 340
+  const photoW = 500
+  const photoH = 260
+
+  for (let i = 0; i < Math.min(photos.length, 3); i++) {
+    const cardY = 60 + i * 360
+    const cardX = canvas.width / 2
+
+    ctx.save()
+    ctx.translate(cardX, cardY + cardH / 2)
+    ctx.rotate((angles[i] * Math.PI) / 180)
+
+    // Polaroid Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'
+    ctx.fillRect(-cardW / 2 + 8, -cardH / 2 + 8, cardW, cardH)
+
+    // Polaroid Card White Body
+    ctx.fillStyle = '#FDFBF7'
+    ctx.fillRect(-cardW / 2, -cardH / 2, cardW, cardH)
+
+    // Scotch Tape at top corner
+    ctx.fillStyle = 'rgba(255, 230, 0, 0.6)'
+    ctx.fillRect(-cardW / 2 + 20, -cardH / 2 - 12, 70, 24)
+
+    // Photo inside Polaroid
+    const img = await loadImage(photos[i])
+    const px = -photoW / 2
+    const py = -cardH / 2 + 18
+    drawPhotoWithAdjustments(ctx, img, px, py, photoW, photoH, adjustments[i])
+
+    // Handwritten Caption / Date
+    const captionText = captions[i] || `Jepretan Spider-Verse #${i + 1}`
+    ctx.fillStyle = '#1E1B4B'
+    ctx.font = '700 24px Bangers, cursive'
+    ctx.textAlign = 'center'
+    ctx.fillText(captionText, 0, cardH / 2 - 20)
+
+    // Stickers
+    const stickersForCell = placements[i] || []
+    for (const p of stickersForCell) {
+      const stImg = await loadImage(p.src)
+      const size = p.size
+      ctx.save()
+      const cx = px + p.x * photoW
+      const cy = py + p.y * photoH
+      ctx.translate(cx, cy)
+      ctx.rotate(((p.rotation || 0) * Math.PI) / 180)
+      ctx.drawImage(stImg, -size / 2, -size / 2, size, size)
+      ctx.restore()
+    }
+
+    ctx.restore()
+  }
+
+  if (doodleCanvas) {
+    ctx.drawImage(doodleCanvas, 0, 0, canvas.width, canvas.height)
+  }
+
+  return canvas.toDataURL('image/png')
+}
+
 // Build the final downloadable strip
 export async function renderStrip({
   photos,
@@ -175,6 +325,14 @@ export async function renderStrip({
   doodleCanvas = null,
   adjustments = [],
 }) {
+  if (layout === 'polaroid') {
+    return renderPolaroidTrio({ photos, placements, captions, adjustments, doodleCanvas })
+  }
+
+  if (layout === 'filmreel') {
+    return renderFilmReel({ photos, placements, captions, adjustments, doodleCanvas })
+  }
+
   const selectedTheme = SPIDER_THEMES.find((t) => t.id === themeId) || SPIDER_THEMES[0]
 
   // If using classic Spidey PNG frame template and layout is strip with 3 photos
