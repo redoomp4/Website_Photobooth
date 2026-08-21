@@ -446,18 +446,30 @@ export default function StripPreview({
 
         <div className="editor__layoutToggle">
           <span>TATA LETAK (LAYOUT)</span>
-          <div className="webshooter__track">
+          <div className="webshooter__track webshooter__track--grid">
             <button
               className={`webshooter__btn ${layout === 'strip' ? 'is-active' : ''}`}
               onClick={() => setLayout('strip')}
             >
-              STRIP VERTIKAL
+              STRIP
             </button>
             <button
               className={`webshooter__btn ${layout === 'grid' ? 'is-active' : ''}`}
               onClick={() => setLayout('grid')}
             >
               GRID 2×2
+            </button>
+            <button
+              className={`webshooter__btn ${layout === 'polaroid' ? 'is-active' : ''}`}
+              onClick={() => setLayout('polaroid')}
+            >
+              POLAROID
+            </button>
+            <button
+              className={`webshooter__btn ${layout === 'filmreel' ? 'is-active' : ''}`}
+              onClick={() => setLayout('filmreel')}
+            >
+              FILM 35MM
             </button>
           </div>
         </div>
