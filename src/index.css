@@ -1931,6 +1931,977 @@ img {
   flex-wrap: wrap;
 }
 
+/* Layout toggle grid mode */
+.webshooter__track--grid {
+  flex-wrap: wrap;
+}
+
+/* ---------------- Web-Shooter Arcade Overlay ---------------- */
+.web-blaster-toggle {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 900;
+  background: var(--ink-deep);
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  box-shadow: 4px 4px 0 #000;
+  transition: all 0.2s ease;
+}
+
+.web-blaster-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0 #000;
+  background: var(--theme-accent);
+  color: #fff;
+}
+
+.web-blaster-toggle.is-active {
+  background: var(--crimson);
+  color: #fff;
+  border-color: var(--gold);
+  animation: pulse-radio 1.5s infinite alternate;
+}
+
+.blaster-icon {
+  font-size: 1.4rem;
+}
+
+.arcade-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(10, 12, 20, 0.96);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.arcade-container {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arcade-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arcade-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  color: var(--gold);
+  margin: 0;
+  text-shadow: 3px 3px 0 #000;
+}
+
+/* Arcade Splash Screen */
+.arcade-splash {
+  text-align: center;
+  padding: 30px 16px;
+}
+
+.arcade-splash__logo {
+  font-size: 64px;
+  margin-bottom: 12px;
+  animation: pulse-spin 3s ease-in-out infinite;
+}
+
+.arcade-splash h3 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--theme-accent);
+  margin: 0 0 8px;
+}
+
+.arcade-splash p {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+  max-width: 500px;
+  margin-inline: auto;
+}
+
+.arcade-splash__rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.rule-item {
+  background: var(--ink-light);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #000;
+}
+
+/* Arcade HUD */
+.arcade-hud {
+  display: flex;
+  justify-content: space-around;
+  background: var(--ink-deep);
+  border: 3px solid #000;
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.hud-stat__label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hud-stat__value {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--cyan);
+}
+
+.hud-stat__value--score {
+  color: var(--gold);
+}
+
+.hud-stat__value--danger {
+  color: var(--crimson);
+  animation: blink 0.5s infinite;
+}
+
+/* Arcade Timer Bar */
+.arcade-timer-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.arcade-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--crimson), var(--gold));
+  border-radius: 4px;
+  transition: width 0.9s linear;
+}
+
+/* Arcade Game Field */
+.arcade-field {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  min-height: 280px;
+  max-height: 420px;
+  background: var(--ink);
+  border: 4px solid #000;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: crosshair;
+  box-shadow: 6px 6px 0 #000;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Flying Target */
+.arcade-target {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: target-bob 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes target-bob {
+  0% { transform: translate(-50%, -50%) translateY(-4px); }
+  100% { transform: translate(-50%, -50%) translateY(4px); }
+}
+
+.arcade-target__emoji {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.5));
+}
+
+.arcade-target__pts {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--gold);
+}
+
+/* Web Splat */
+.arcade-splat {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
+  animation: splat-fade 0.8s ease-out forwards;
+}
+
+@keyframes splat-fade {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+
+/* Combo Flash */
+.arcade-combo-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 #000;
+  pointer-events: none;
+  animation: combo-pop 0.6s ease-out;
+}
+
+@keyframes combo-pop {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+}
+
+/* Arcade Results Screen */
+.arcade-results {
+  text-align: center;
+  padding: 20px 16px;
+}
+
+.arcade-results__title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--theme-accent);
+  margin: 0 0 10px;
+}
+
+.arcade-results__rank {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.arcade-results__stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.result-stat__num {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--cyan);
+}
+
+.result-stat__label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.arcade-results__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------------- Spider Trivia Modal ---------------- */
+.modal--trivia {
+  max-width: 580px;
+}
+
+.trivia-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.trivia-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink-light);
+  border: 2px solid #000;
+  transition: all 0.3s ease;
+}
+
+.trivia-dot.is-current {
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+  transform: scale(1.2);
+}
+
+.trivia-dot.is-correct { background: #10B981; }
+.trivia-dot.is-wrong { background: #E63946; }
+
+.trivia-timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.trivia-timer-ring {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.trivia-timer-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.trivia-timer-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: #fff;
+}
+
+.trivia-timer-ring.is-danger .trivia-timer-num {
+  color: var(--crimson);
+  animation: blink 0.5s infinite;
+}
+
+.trivia-q-label {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.trivia-question {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 16px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.trivia-answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .trivia-answers {
+    grid-template-columns: 1fr;
+  }
+}
+
+.trivia-answer-btn {
+  background: var(--ink-light);
+  border: 3px solid #000;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
+  box-shadow: 3px 3px 0 #000;
+  transition: all 0.15s ease;
+}
+
+.trivia-answer-btn:hover:not(:disabled) {
+  background: var(--cyan);
+  color: #000;
+  transform: translateY(-2px);
+}
+
+.trivia-answer-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.trivia-answer-btn.is-correct {
+  background: #10B981;
+  color: #fff;
+  border-color: #059669;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);
+}
+
+.trivia-answer-btn.is-wrong {
+  background: #E63946;
+  color: #fff;
+  border-color: #9E0017;
+  animation: shake 0.4s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.answer-letter {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Trivia Results */
+.trivia-results {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.trivia-results__score-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 14px;
+}
+
+.score-ring-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.score-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.score-ring-num {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: #fff;
+  line-height: 1;
+}
+
+.score-ring-of {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.trivia-results__grade {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+  margin: 0 0 16px;
+}
+
+.trivia-review {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.review-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ink-light);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.review-row.is-correct { border-left: 4px solid #10B981; }
+.review-row.is-wrong { border-left: 4px solid #E63946; }
+
+/* ---------------- Memory Match Game Modal ---------------- */
+.modal--memory {
+  max-width: 560px;
+}
+
+.memory-menu {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.memory-menu__desc {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 20px;
+}
+
+.memory-menu__buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.memory-hud {
+  display: flex;
+  justify-content: space-around;
+  background: var(--ink-light);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 14px;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.memory-hud__stat {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.memory-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.memory-grid--easy {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.memory-grid--hard {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.memory-card {
+  aspect-ratio: 1;
+  perspective: 600px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.memory-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.memory-card.is-flipped .memory-card__inner,
+.memory-card.is-matched .memory-card__inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card__front,
+.memory-card__back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 3px solid #000;
+  backface-visibility: hidden;
+  font-size: 1.6rem;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.memory-card__front {
+  background: var(--ink-light);
+  background-image: repeating-linear-gradient(
+    45deg, transparent, transparent 4px, rgba(255,255,255,0.03) 4px, rgba(255,255,255,0.03) 8px
+  );
+}
+
+.memory-card__back {
+  background: var(--ink-deep);
+  border-color: var(--cyan);
+  transform: rotateY(180deg);
+}
+
+.memory-card.is-matched .memory-card__back {
+  border-color: #10B981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.memory-card.is-matched {
+  animation: match-bounce 0.4s ease-out;
+}
+
+@keyframes match-bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Memory Win */
+.memory-win {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.memory-win__stars {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.memory-star {
+  font-size: 2.2rem;
+  color: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.memory-star.is-earned {
+  color: var(--gold);
+  filter: drop-shadow(0 0 8px rgba(255, 230, 0, 0.5));
+  animation: star-pop 0.4s ease-out backwards;
+}
+
+.memory-star:nth-child(1).is-earned { animation-delay: 0.1s; }
+.memory-star:nth-child(2).is-earned { animation-delay: 0.3s; }
+.memory-star:nth-child(3).is-earned { animation-delay: 0.5s; }
+
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(-45deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.memory-win__title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin: 0 0 12px;
+}
+
+.memory-win__stats p {
+  font-size: 1rem;
+  margin: 4px 0;
+}
+
+/* ---------------- Mini-Game Launcher Cards (Setup Screen) ---------------- */
+.panel__games-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.btn-game-card {
+  background: var(--ink-light);
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 4px 4px 0 #000;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.btn-game-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 5px 5px 0 #000;
+  border-color: var(--theme-accent);
+}
+
+.btn-game-card:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.game-card-icon {
+  font-size: 2rem;
+}
+
+.game-card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+
+.game-card-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.3;
+}
+
+/* ---------------- Mobile Floating Dock (Bottom Nav) ---------------- */
+.mobile-dock {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 950;
+  background: var(--ink-deep);
+  border-top: 3px solid #000;
+  padding: 6px 12px;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
+  gap: 4px;
+}
+
+@media (max-width: 640px) {
+  .mobile-dock {
+    display: flex;
+  }
+
+  /* Add bottom padding to page so content isn't hidden behind dock */
+  .app {
+    padding-bottom: 100px;
+  }
+
+  .web-blaster-toggle {
+    bottom: 64px;
+    right: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+.mobile-dock__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.mobile-dock__btn.is-active {
+  color: var(--theme-accent);
+}
+
+.mobile-dock__btn:hover,
+.mobile-dock__btn:active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dock-icon {
+  font-size: 1.4rem;
+}
+
+.dock-label {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ---------------- Responsive Polish ---------------- */
+
+/* Tablet breakpoint */
+@media (max-width: 860px) {
+  .editor__featureBar {
+    justify-content: center;
+  }
+
+  .arcade-field {
+    height: 45vh;
+    min-height: 240px;
+  }
+}
+
+/* Phone breakpoint */
+@media (max-width: 480px) {
+  .app__header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .app__brand h1 {
+    font-size: 2rem;
+  }
+
+  .app__tagline {
+    font-size: 0.82rem;
+  }
+
+  .panel {
+    padding: 14px 10px;
+    border-radius: 12px;
+  }
+
+  .btn--lg {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
+
+  .editor__featureBar {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .btn-feature-item {
+    font-size: 0.92rem;
+    padding: 6px 10px;
+  }
+
+  .themeSelector {
+    grid-template-columns: 1fr;
+  }
+
+  .belt__item {
+    width: 70px;
+    height: 70px;
+  }
+
+  .belt__item img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .arcade-title {
+    font-size: 1.4rem;
+  }
+
+  .arcade-splash__logo {
+    font-size: 48px;
+  }
+
+  .arcade-splash h3 {
+    font-size: 1.3rem;
+  }
+
+  .rule-item {
+    font-size: 0.78rem;
+    padding: 6px 10px;
+  }
+
+  .hud-stat__value {
+    font-size: 1.2rem;
+  }
+
+  .radio-widget {
+    max-width: 300px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .radio-track-title {
+    font-size: 0.9rem;
+  }
+
+  .panel__games-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .memory-grid--hard {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+
+  .memory-card__front,
+  .memory-card__back {
+    font-size: 1.2rem;
+    border-radius: 6px;
+  }
+}
+
+/* Large phone landscape */
+@media (max-width: 640px) and (orientation: landscape) {
+  .arcade-field {
+    height: 55vh;
+    max-height: none;
+  }
+
+  .arcade-splash {
+    padding: 16px 12px;
+  }
+
+  .arcade-splash__logo {
+    font-size: 40px;
+    margin-bottom: 6px;
+  }
+}
+
+/* Smooth page transitions */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Hover-only interactions on non-touch */
+@media (hover: hover) {
+  .btn-game-card:hover {
+    background: var(--ink-deep);
+  }
+
+  .trivia-answer-btn:hover:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 /* ---------------- App Footer ---------------- */
 .app__footer {
   text-align: center;
