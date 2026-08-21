@@ -1,54 +1,40 @@
+import { useState, useEffect } from 'react'
+
 export default function MobileDock({
   stage,
-  onSetStage,
-  onOpenIdCard,
-  onOpenComicCover,
-  onOpenCanonEvent,
-  onToggleDoodle,
-  doodleEnabled,
-  onDownload,
+  muted,
+  onOpenTrivia,
+  onOpenMemory,
+  onToggleMute,
 }) {
+  const [showLabel, setShowLabel] = useState(true)
+
+  // Hide tooltip labels after 4 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowLabel(false), 4000)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
-    <nav className="mobile-dock">
-      <button
-        className={`mobile-dock__btn ${stage === 'setup' || stage === 'capture' ? 'is-active' : ''}`}
-        onClick={() => onSetStage(stage === 'capture' ? 'setup' : 'capture')}
-      >
-        <span className="dock-icon">📸</span>
-        <span className="dock-label">Kamera</span>
+    <nav className="mobile-dock" role="navigation" aria-label="Quick Actions">
+      <button className="mobile-dock__btn" onClick={onOpenTrivia} title="Spider-Verse Trivia Quiz">
+        <span className="dock-icon">🧠</span>
+        <span className="dock-label">Trivia</span>
       </button>
 
-      {stage === 'edit' && (
-        <>
-          <button
-            className={`mobile-dock__btn ${doodleEnabled ? 'is-active' : ''}`}
-            onClick={onToggleDoodle}
-          >
-            <span className="dock-icon">🎨</span>
-            <span className="dock-label">Doodle</span>
-          </button>
+      <button className="mobile-dock__btn" onClick={onOpenMemory} title="Memory Match Game">
+        <span className="dock-icon">🃏</span>
+        <span className="dock-label">Memory</span>
+      </button>
 
-          <button className="mobile-dock__btn" onClick={onOpenIdCard}>
-            <span className="dock-icon">🪪</span>
-            <span className="dock-label">ID Card</span>
-          </button>
-
-          <button className="mobile-dock__btn" onClick={onOpenComicCover}>
-            <span className="dock-icon">📖</span>
-            <span className="dock-label">Cover</span>
-          </button>
-
-          <button className="mobile-dock__btn" onClick={onOpenCanonEvent}>
-            <span className="dock-icon">⚡</span>
-            <span className="dock-label">Canon</span>
-          </button>
-
-          <button className="mobile-dock__btn mobile-dock__btn--highlight" onClick={onDownload}>
-            <span className="dock-icon">📥</span>
-            <span className="dock-label">Unduh</span>
-          </button>
-        </>
-      )}
+      <button
+        className={`mobile-dock__btn ${muted ? '' : 'is-active'}`}
+        onClick={onToggleMute}
+        title={muted ? 'Nyalakan Suara' : 'Bisukan Suara'}
+      >
+        <span className="dock-icon">{muted ? '🔇' : '🔊'}</span>
+        <span className="dock-label">{muted ? 'Mute' : 'Sound'}</span>
+      </button>
     </nav>
   )
 }
