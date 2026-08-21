@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import AppHeader from './components/AppHeader'
 import WebParticleEffect from './components/WebParticleEffect'
+import WebShooterGame from './components/WebShooterGame'
+import MobileDock from './components/MobileDock'
 import ComicToggle from './components/ComicToggle'
 import FilterRail from './components/FilterRail'
 import Viewfinder from './components/Viewfinder'
@@ -22,6 +24,7 @@ export default function App() {
   const [customBubbles, setCustomBubbles] = useState([])
   const [bubbleModalOpen, setBubbleModalOpen] = useState(false)
   const [activeDimension, setActiveDimension] = useState('earth616')
+  const [webShooterActive, setWebShooterActive] = useState(false)
 
   // Set CSS class on root container according to active dimension
   useEffect(() => {
@@ -50,6 +53,13 @@ export default function App() {
     <div className={`app dimension--${activeDimension}`}>
       {/* Interactive Web Particle Canvas */}
       <WebParticleEffect dimension={activeDimension} />
+
+      {/* Interactive Arcade Web-Shooter Overlay & Easter Egg */}
+      <WebShooterGame
+        active={webShooterActive}
+        muted={muted}
+        onToggle={() => setWebShooterActive((v) => !v)}
+      />
 
       {/* Spider-Verse Brand Header & Audio Engine */}
       <AppHeader
@@ -169,6 +179,32 @@ export default function App() {
         isOpen={bubbleModalOpen}
         onClose={() => setBubbleModalOpen(false)}
         onAddBubble={handleAddCustomBubble}
+      />
+
+      {/* Mobile Floating Action Dock */}
+      <MobileDock
+        stage={stage}
+        onSetStage={setStage}
+        onOpenIdCard={() => {
+          const btn = document.querySelector('.btn-feature-item')
+          btn?.click()
+        }}
+        onOpenComicCover={() => {
+          const btns = document.querySelectorAll('.btn-feature-item')
+          btns[1]?.click()
+        }}
+        onOpenCanonEvent={() => {
+          const btns = document.querySelectorAll('.btn-feature-item')
+          btns[2]?.click()
+        }}
+        onToggleDoodle={() => {
+          const dBtn = document.querySelector('.editor__doodleToggle .btn')
+          dBtn?.click()
+        }}
+        onDownload={() => {
+          const dBtn = document.querySelector('.editor__actions .btn--primary')
+          dBtn?.click()
+        }}
       />
 
       <footer className="app__footer">
