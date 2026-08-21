@@ -3,6 +3,8 @@ import AppHeader from './components/AppHeader'
 import WebParticleEffect from './components/WebParticleEffect'
 import WebShooterGame from './components/WebShooterGame'
 import MobileDock from './components/MobileDock'
+import SpiderTrivia from './components/SpiderTrivia'
+import MemoryGame from './components/MemoryGame'
 import ComicToggle from './components/ComicToggle'
 import FilterRail from './components/FilterRail'
 import Viewfinder from './components/Viewfinder'
@@ -25,6 +27,8 @@ export default function App() {
   const [bubbleModalOpen, setBubbleModalOpen] = useState(false)
   const [activeDimension, setActiveDimension] = useState('earth616')
   const [webShooterActive, setWebShooterActive] = useState(false)
+  const [triviaOpen, setTriviaOpen] = useState(false)
+  const [memoryOpen, setMemoryOpen] = useState(false)
 
   // Set CSS class on root container according to active dimension
   useEffect(() => {
@@ -54,7 +58,7 @@ export default function App() {
       {/* Interactive Web Particle Canvas */}
       <WebParticleEffect dimension={activeDimension} />
 
-      {/* Interactive Arcade Web-Shooter Overlay & Easter Egg */}
+      {/* Interactive Arcade Web-Shooter Overlay */}
       <WebShooterGame
         active={webShooterActive}
         muted={muted}
@@ -113,6 +117,31 @@ export default function App() {
                   <strong>Multiverse ID &amp; Cover:</strong> Di layar edit, buat Kartu Anggota Spider-Society &amp; Sampul Majalah Komik Marvel!
                 </div>
               </div>
+              <div className="tip-card">
+                <span className="tip-icon">🕹️</span>
+                <div className="tip-text">
+                  <strong>Mini Games:</strong> Mainkan Trivia Quiz, Memory Match, dan Web-Shooter Arcade sambil menunggu!
+                </div>
+              </div>
+            </div>
+
+            {/* Quick-Start Mini Games on Setup */}
+            <div className="panel__games-bar">
+              <button className="btn-game-card" onClick={() => setTriviaOpen(true)}>
+                <span className="game-card-icon">🧠</span>
+                <span className="game-card-title">SPIDER TRIVIA</span>
+                <span className="game-card-desc">Uji pengetahuan Spider-Verse!</span>
+              </button>
+              <button className="btn-game-card" onClick={() => setMemoryOpen(true)}>
+                <span className="game-card-icon">🃏</span>
+                <span className="game-card-title">MEMORY MATCH</span>
+                <span className="game-card-desc">Temukan pasangan simbol!</span>
+              </button>
+              <button className="btn-game-card" onClick={() => setWebShooterActive(true)}>
+                <span className="game-card-icon">🕹️</span>
+                <span className="game-card-title">WEB-SHOOTER</span>
+                <span className="game-card-desc">Tembak musuh terbang!</span>
+              </button>
             </div>
 
             <button
@@ -181,30 +210,26 @@ export default function App() {
         onAddBubble={handleAddCustomBubble}
       />
 
-      {/* Mobile Floating Action Dock */}
+      {/* Spider-Verse Trivia Challenge */}
+      <SpiderTrivia
+        isOpen={triviaOpen}
+        onClose={() => setTriviaOpen(false)}
+        muted={muted}
+      />
+
+      {/* Memory Match Game */}
+      <MemoryGame
+        isOpen={memoryOpen}
+        onClose={() => setMemoryOpen(false)}
+      />
+
+      {/* Mobile Floating Bottom Dock */}
       <MobileDock
         stage={stage}
-        onSetStage={setStage}
-        onOpenIdCard={() => {
-          const btn = document.querySelector('.btn-feature-item')
-          btn?.click()
-        }}
-        onOpenComicCover={() => {
-          const btns = document.querySelectorAll('.btn-feature-item')
-          btns[1]?.click()
-        }}
-        onOpenCanonEvent={() => {
-          const btns = document.querySelectorAll('.btn-feature-item')
-          btns[2]?.click()
-        }}
-        onToggleDoodle={() => {
-          const dBtn = document.querySelector('.editor__doodleToggle .btn')
-          dBtn?.click()
-        }}
-        onDownload={() => {
-          const dBtn = document.querySelector('.editor__actions .btn--primary')
-          dBtn?.click()
-        }}
+        muted={muted}
+        onOpenTrivia={() => setTriviaOpen(true)}
+        onOpenMemory={() => setMemoryOpen(true)}
+        onToggleMute={() => setMuted((m) => !m)}
       />
 
       <footer className="app__footer">
